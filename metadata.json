@@ -1,0 +1,8 @@
+{
+  "name": "App Rating Predictor",
+  "description": "A clean SaaS-style full-stack Node.js + Express web application with an interactive HTML and Tailwind CSS frontend for predicting and diagnosing mobile app store ratings with SHAP explainability metrics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

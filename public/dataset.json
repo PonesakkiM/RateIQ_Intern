@@ -1,0 +1,157 @@
+{
+  "ART_AND_DESIGN": [
+    {"appName": "Canva", "rating": 4.7, "installs": 100000000, "reviews": 9500000, "size": 32.0, "appType": "Free", "price": 0.0},
+    {"appName": "Sketchbook", "rating": 4.3, "installs": 50000000, "reviews": 550000, "size": 98.0, "appType": "Free", "price": 0.0},
+    {"appName": "ibis Paint X", "rating": 4.4, "installs": 100000000, "reviews": 3200000, "size": 45.0, "appType": "Free", "price": 0.0}
+  ],
+  "AUTO_AND_VEHICLES": [
+    {"appName": "Android Auto", "rating": 4.0, "installs": 5000000000, "reviews": 4200000, "size": 35.0, "appType": "Free", "price": 0.0},
+    {"appName": "Autotrader", "rating": 4.6, "installs": 10000000, "reviews": 180000, "size": 28.0, "appType": "Free", "price": 0.0},
+    {"appName": "CARFAX", "rating": 4.7, "installs": 10000000, "reviews": 220000, "size": 42.0, "appType": "Free", "price": 0.0}
+  ],
+  "BEAUTY": [
+    {"appName": "Sephora", "rating": 4.7, "installs": 10000000, "reviews": 280000, "size": 65.0, "appType": "Free", "price": 0.0},
+    {"appName": "Mary Kay Makeup Muse", "rating": 4.4, "installs": 1000000, "reviews": 12000, "size": 48.0, "appType": "Free", "price": 0.0},
+    {"appName": "Perfect365", "rating": 4.3, "installs": 50000000, "reviews": 750000, "size": 52.0, "appType": "Free", "price": 0.0}
+  ],
+  "BOOKS_AND_REFERENCE": [
+    {"appName": "Kindle", "rating": 4.6, "installs": 100000000, "reviews": 2400000, "size": 58.0, "appType": "Free", "price": 0.0},
+    {"appName": "Wattpad", "rating": 4.2, "installs": 100000000, "reviews": 4800000, "size": 33.0, "appType": "Free", "price": 0.0},
+    {"appName": "Audible", "rating": 4.5, "installs": 100000000, "reviews": 1500000, "size": 41.0, "appType": "Free", "price": 0.0}
+  ],
+  "BUSINESS": [
+    {"appName": "Zoom", "rating": 4.4, "installs": 500000000, "reviews": 3800000, "size": 62.0, "appType": "Free", "price": 0.0},
+    {"appName": "Microsoft Teams", "rating": 4.5, "installs": 100000000, "reviews": 1200000, "size": 71.0, "appType": "Free", "price": 0.0},
+    {"appName": "Slack", "rating": 4.4, "installs": 10000000, "reviews": 140000, "size": 32.0, "appType": "Free", "price": 0.0}
+  ],
+  "COMICS": [
+    {"appName": "WEBTOON", "rating": 4.7, "installs": 50000000, "reviews": 2800000, "size": 36.0, "appType": "Free", "price": 0.0},
+    {"appName": "Marvel Unlimited", "rating": 4.2, "installs": 1000000, "reviews": 25000, "size": 45.0, "appType": "Free", "price": 0.0},
+    {"appName": "Crunchyroll Manga", "rating": 3.1, "installs": 5000000, "reviews": 82000, "size": 24.0, "appType": "Free", "price": 0.0}
+  ],
+  "COMMUNICATION": [
+    {"appName": "WhatsApp Messenger", "rating": 4.3, "installs": 5000000000, "reviews": 170000000, "size": 36.0, "appType": "Free", "price": 0.0},
+    {"appName": "Telegram", "rating": 4.4, "installs": 1000000000, "reviews": 12000000, "size": 28.0, "appType": "Free", "price": 0.0},
+    {"appName": "Discord", "rating": 4.5, "installs": 100000000, "reviews": 4500000, "size": 65.0, "appType": "Free", "price": 0.0}
+  ],
+  "DATING": [
+    {"appName": "Tinder", "rating": 3.8, "installs": 100000000, "reviews": 4500000, "size": 48.0, "appType": "Free", "price": 0.0},
+    {"appName": "Bumble", "rating": 4.0, "installs": 50000000, "reviews": 500000, "size": 44.0, "appType": "Free", "price": 0.0},
+    {"appName": "Hinge", "rating": 4.4, "installs": 10000000, "reviews": 250000, "size": 55.0, "appType": "Free", "price": 0.0}
+  ],
+  "EDUCATION": [
+    {"appName": "Duolingo", "rating": 4.7, "installs": 100000000, "reviews": 15000000, "size": 42.0, "appType": "Free", "price": 0.0},
+    {"appName": "Photomath", "rating": 4.6, "installs": 100000000, "reviews": 3100000, "size": 28.0, "appType": "Free", "price": 0.0},
+    {"appName": "Khan Academy", "rating": 4.5, "installs": 10000000, "reviews": 180000, "size": 18.0, "appType": "Free", "price": 0.0}
+  ],
+  "ENTERTAINMENT": [
+    {"appName": "Netflix", "rating": 4.4, "installs": 1000000000, "reviews": 14200000, "size": 42.1, "appType": "Free", "price": 0.0},
+    {"appName": "Disney+", "rating": 4.1, "installs": 100000000, "reviews": 3500000, "size": 38.0, "appType": "Free", "price": 0.0},
+    {"appName": "Amazon Prime Video", "rating": 4.2, "installs": 500000000, "reviews": 3800000, "size": 34.0, "appType": "Free", "price": 0.0}
+  ],
+  "EVENTS": [
+    {"appName": "Ticketmaster", "rating": 4.2, "installs": 10000000, "reviews": 120000, "size": 45.0, "appType": "Free", "price": 0.0},
+    {"appName": "Eventbrite", "rating": 4.6, "installs": 10000000, "reviews": 85000, "size": 31.0, "appType": "Free", "price": 0.0},
+    {"appName": "Meetup", "rating": 4.4, "installs": 10000000, "reviews": 160000, "size": 28.0, "appType": "Free", "price": 0.0}
+  ],
+  "FINANCE": [
+    {"appName": "PayPal", "rating": 4.3, "installs": 100000000, "reviews": 2800000, "size": 55.0, "appType": "Free", "price": 0.0},
+    {"appName": "Venmo", "rating": 4.2, "installs": 50000000, "reviews": 600000, "size": 42.0, "appType": "Free", "price": 0.0},
+    {"appName": "Cash App", "rating": 4.6, "installs": 50000000, "reviews": 1500000, "size": 36.0, "appType": "Free", "price": 0.0}
+  ],
+  "FOOD_AND_DRINK": [
+    {"appName": "Uber Eats", "rating": 4.4, "installs": 100000000, "reviews": 4500000, "size": 52.0, "appType": "Free", "price": 0.0},
+    {"appName": "McDonald's", "rating": 3.9, "installs": 100000000, "reviews": 1200000, "size": 48.0, "appType": "Free", "price": 0.0},
+    {"appName": "Starbucks", "rating": 4.5, "installs": 50000000, "reviews": 850000, "size": 36.0, "appType": "Free", "price": 0.0}
+  ],
+  "HEALTH_AND_FITNESS": [
+    {"appName": "Strava", "rating": 4.5, "installs": 50000000, "reviews": 800000, "size": 41.0, "appType": "Free", "price": 0.0},
+    {"appName": "MyFitnessPal", "rating": 4.4, "installs": 100000000, "reviews": 2500000, "size": 62.0, "appType": "Free", "price": 0.0},
+    {"appName": "Fitbit", "rating": 4.0, "installs": 50000000, "reviews": 1100000, "size": 85.0, "appType": "Free", "price": 0.0}
+  ],
+  "HOUSE_AND_HOME": [
+    {"appName": "Zillow", "rating": 4.6, "installs": 50000000, "reviews": 1200000, "size": 64.0, "appType": "Free", "price": 0.0},
+    {"appName": "Airbnb", "rating": 4.5, "installs": 100000000, "reviews": 1500000, "size": 72.0, "appType": "Free", "price": 0.0},
+    {"appName": "Redfin", "rating": 4.7, "installs": 10000000, "reviews": 180000, "size": 38.0, "appType": "Free", "price": 0.0}
+  ],
+  "LIBRARIES_AND_DEMO": [
+    {"appName": "Google Play Services", "rating": 4.1, "installs": 10000000000, "reviews": 32000000, "size": 150.0, "appType": "Free", "price": 0.0},
+    {"appName": "APK Mirror", "rating": 4.3, "installs": 1000000, "reviews": 15000, "size": 12.0, "appType": "Free", "price": 0.0},
+    {"appName": "DevCheck", "rating": 4.7, "installs": 5000000, "reviews": 120000, "size": 8.5, "appType": "Free", "price": 0.0}
+  ],
+  "LIFESTYLE": [
+    {"appName": "Pinterest", "rating": 4.5, "installs": 500000000, "reviews": 9500000, "size": 45.0, "appType": "Free", "price": 0.0},
+    {"appName": "Amazon Alexa", "rating": 4.3, "installs": 50000000, "reviews": 400000, "size": 82.0, "appType": "Free", "price": 0.0},
+    {"appName": "Google Home", "rating": 4.0, "installs": 100000000, "reviews": 1100000, "size": 58.0, "appType": "Free", "price": 0.0}
+  ],
+  "GAME": [
+    {"appName": "Subway Surfers", "rating": 4.4, "installs": 1000000000, "reviews": 35000000, "size": 82.0, "appType": "Free", "price": 0.0},
+    {"appName": "Candy Crush Saga", "rating": 4.6, "installs": 1000000000, "reviews": 31000000, "size": 76.0, "appType": "Free", "price": 0.0},
+    {"appName": "Minecraft", "rating": 4.6, "installs": 50000000, "reviews": 4800000, "size": 125.0, "appType": "Paid", "price": 7.49}
+  ],
+  "FAMILY": [
+    {"appName": "Roblox", "rating": 4.4, "installs": 500000000, "reviews": 32000000, "size": 112.0, "appType": "Free", "price": 0.0},
+    {"appName": "My Talking Tom", "rating": 4.4, "installs": 500000000, "reviews": 16000000, "size": 95.0, "appType": "Free", "price": 0.0},
+    {"appName": "Toca Life World", "rating": 4.3, "installs": 100000000, "reviews": 4000000, "size": 78.0, "appType": "Free", "price": 0.0}
+  ],
+  "MEDICAL": [
+    {"appName": "MyChart", "rating": 4.6, "installs": 10000000, "reviews": 280000, "size": 45.0, "appType": "Free", "price": 0.0},
+    {"appName": "GoodRx", "rating": 4.8, "installs": 10000000, "reviews": 350000, "size": 32.0, "appType": "Free", "price": 0.0},
+    {"appName": "WebMD", "rating": 4.3, "installs": 10000000, "reviews": 140000, "size": 28.0, "appType": "Free", "price": 0.0}
+  ],
+  "SOCIAL": [
+    {"appName": "Facebook", "rating": 4.1, "installs": 5000000000, "reviews": 131000000, "size": 54.0, "appType": "Free", "price": 0.0},
+    {"appName": "Instagram", "rating": 4.3, "installs": 1000000000, "reviews": 143000000, "size": 48.0, "appType": "Free", "price": 0.0},
+    {"appName": "Snapchat", "rating": 4.2, "installs": 1000000000, "reviews": 27000000, "size": 67.0, "appType": "Free", "price": 0.0}
+  ],
+  "SHOPPING": [
+    {"appName": "Amazon Shopping", "rating": 4.3, "installs": 500000000, "reviews": 3200000, "size": 62.0, "appType": "Free", "price": 0.0},
+    {"appName": "eBay", "rating": 4.5, "installs": 100000000, "reviews": 4300000, "size": 48.0, "appType": "Free", "price": 0.0},
+    {"appName": "SHEIN", "rating": 4.6, "installs": 500000000, "reviews": 6200000, "size": 55.0, "appType": "Free", "price": 0.0}
+  ],
+  "PHOTOGRAPHY": [
+    {"appName": "PicsArt Photo Editor", "rating": 4.3, "installs": 500000000, "reviews": 11000000, "size": 75.0, "appType": "Free", "price": 0.0},
+    {"appName": "Adobe Photoshop Express", "rating": 4.5, "installs": 100000000, "reviews": 1800000, "size": 68.0, "appType": "Free", "price": 0.0},
+    {"appName": "B612", "rating": 4.2, "installs": 500000000, "reviews": 8200000, "size": 91.0, "appType": "Free", "price": 0.0}
+  ],
+  "TOOLS": [
+    {"appName": "Google Chrome", "rating": 4.1, "installs": 10000000000, "reviews": 41000000, "size": 85.0, "appType": "Free", "price": 0.0},
+    {"appName": "Shareit", "rating": 4.3, "installs": 1000000000, "reviews": 16000000, "size": 31.0, "appType": "Free", "price": 0.0},
+    {"appName": "CCleaner", "rating": 4.4, "installs": 100000000, "reviews": 2100000, "size": 24.0, "appType": "Free", "price": 0.0}
+  ],
+  "PERSONALIZATION": [
+    {"appName": "Zedge", "rating": 4.4, "installs": 100000000, "reviews": 10000000, "size": 32.0, "appType": "Free", "price": 0.0},
+    {"appName": "Nova Launcher", "rating": 4.5, "installs": 50000000, "reviews": 1200000, "size": 15.0, "appType": "Free", "price": 0.0},
+    {"appName": "Gboard", "rating": 4.3, "installs": 5000000000, "reviews": 11000000, "size": 42.0, "appType": "Free", "price": 0.0}
+  ],
+  "PRODUCTIVITY": [
+    {"appName": "Microsoft Word", "rating": 4.4, "installs": 1000000000, "reviews": 6200000, "size": 72.0, "appType": "Free", "price": 0.0},
+    {"appName": "Google Drive", "rating": 4.4, "installs": 5000000000, "reviews": 10000000, "size": 35.0, "appType": "Free", "price": 0.0},
+    {"appName": "Dropbox", "rating": 4.3, "installs": 500000000, "reviews": 2100000, "size": 46.0, "appType": "Free", "price": 0.0}
+  ],
+  "PARENTING": [
+    {"appName": "Baby Tracker", "rating": 4.6, "installs": 1000000, "reviews": 45000, "size": 24.0, "appType": "Free", "price": 0.0},
+    {"appName": "Sprout Baby", "rating": 4.5, "installs": 500000, "reviews": 12000, "size": 38.0, "appType": "Free", "price": 0.0},
+    {"appName": "Pregnancy+", "rating": 4.7, "installs": 10000000, "reviews": 550000, "size": 52.0, "appType": "Free", "price": 0.0}
+  ],
+  "WEATHER": [
+    {"appName": "The Weather Channel", "rating": 4.5, "installs": 100000000, "reviews": 2500000, "size": 48.0, "appType": "Free", "price": 0.0},
+    {"appName": "AccuWeather", "rating": 4.3, "installs": 100000000, "reviews": 2400000, "size": 42.0, "appType": "Free", "price": 0.0},
+    {"appName": "Weather Underground", "rating": 4.4, "installs": 10000000, "reviews": 520000, "size": 36.0, "appType": "Free", "price": 0.0}
+  ],
+  "VIDEO_PLAYERS": [
+    {"appName": "YouTube", "rating": 4.3, "installs": 10000000000, "reviews": 130000000, "size": 45.0, "appType": "Free", "price": 0.0},
+    {"appName": "MX Player", "rating": 4.4, "installs": 1000000000, "reviews": 11000000, "size": 38.0, "appType": "Free", "price": 0.0},
+    {"appName": "VLC for Android", "rating": 4.4, "installs": 100000000, "reviews": 1500000, "size": 31.0, "appType": "Free", "price": 0.0}
+  ],
+  "NEWS_AND_MAGAZINES": [
+    {"appName": "Google News", "rating": 4.1, "installs": 1000000000, "reviews": 450000, "size": 22.0, "appType": "Free", "price": 0.0},
+    {"appName": "Opera News", "rating": 4.3, "installs": 100000000, "reviews": 1100000, "size": 15.0, "appType": "Free", "price": 0.0},
+    {"appName": "Dailyhunt", "rating": 4.3, "installs": 100000000, "reviews": 1500000, "size": 18.0, "appType": "Free", "price": 0.0}
+  ],
+  "MAPS_AND_NAVIGATION": [
+    {"appName": "Google Maps", "rating": 4.3, "installs": 5000000000, "reviews": 14000000, "size": 42.0, "appType": "Free", "price": 0.0},
+    {"appName": "Waze", "rating": 4.4, "installs": 100000000, "reviews": 8200000, "size": 75.0, "appType": "Free", "price": 0.0},
+    {"appName": "Uber", "rating": 4.4, "installs": 500000000, "reviews": 11000000, "size": 62.0, "appType": "Free", "price": 0.0}
+  ]
+}

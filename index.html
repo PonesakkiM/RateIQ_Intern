@@ -1,0 +1,1454 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RateIQ - Predict before you download</title>
+    <link rel="icon" type="image/x-icon" href="/logo.ico" />
+    <script>
+      (function() {
+        try {
+          const savedTheme = localStorage.getItem("rateiq_theme") || "light";
+          if (savedTheme === "dark") {
+            document.documentElement.classList.add("dark");
+          } else {
+            document.documentElement.classList.remove("dark");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      /* Prevent flash of light mode when dark mode is active */
+      html.dark {
+        background-color: #020617;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+    
+    <!-- Header Brand Stripe -->
+    <div class="h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 w-full shrink-0"></div>
+
+    <!-- Main Navigation Header -->
+    <header class="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 flex items-center justify-between shadow-xs transition-colors duration-300 shrink-0">
+      <div class="flex items-center space-x-3">
+        <img id="app-logo" src="/logo.ico" alt="RateIQ" class="h-8 w-8 rounded-xl object-contain shadow-xs" />
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="font-bold text-slate-900 dark:text-white text-base leading-tight">RateIQ</h1>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Predict before you download</p>
+        </div>
+      </div>
+      
+      <!-- Right Header Actions (API Status & Theme Selector) -->
+      <div class="flex items-center space-x-4">
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
+          <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>FastAPI Engine Online</span>
+        </div>
+        
+        <!-- Dark Mode Toggle Button -->
+        <button 
+          id="theme-toggle" 
+          type="button" 
+          aria-label="Toggle dark mode"
+          class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-xs flex items-center justify-center"
+        >
+          <!-- Sun Icon (visible in dark mode) -->
+          <svg id="theme-sun-icon" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+          </svg>
+          <!-- Moon Icon (visible in light mode) -->
+          <svg id="theme-moon-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Sidebar + Main Content Layout -->
+    <div class="flex-1 flex flex-col md:flex-row w-full min-h-0">
+      
+      <!-- Left Sidebar Navigation -->
+      <aside class="w-full md:w-64 bg-white dark:bg-slate-900 border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 flex flex-col shrink-0 transition-colors duration-300">
+        <nav class="p-4 space-y-1">
+          <button id="nav-home" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            <span>Home</span>
+          </button>
+          <button id="nav-prediction" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/20 text-left transition-all duration-200">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2"/></svg>
+            <span>Rating Prediction</span>
+          </button>
+          <button id="nav-competitor" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Competitor Analysis</span>
+          </button>
+          <button id="nav-trend" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+            <span>Trend Analysis</span>
+          </button>
+          <button id="nav-advisor" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            <span>AI Advisor</span>
+          </button>
+          <button id="nav-eda-insights" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <span>EDA Insights</span>
+          </button>
+          <button id="nav-eda-dashboard" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"/></svg>
+            <span>EDA Dashboard</span>
+          </button>
+          <button id="nav-history" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>History</span>
+          </button>
+          <button id="nav-about" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all duration-200 text-left">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>About</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Main Content Pages Window -->
+      <main class="flex-1 overflow-y-auto">
+        
+        <!-- Page: Home -->
+        <div id="page-home" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <div class="max-w-4xl space-y-6">
+            <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white">Welcome to RateIQ Predictive Workspace</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Harness advanced statistical intelligence and market benchmarks to evaluate, forecast, and optimize your mobile applications before publishing.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3 shadow-xs animate-fadeIn">
+                <div class="p-2 w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                  ★
+                </div>
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white">Rating Prediction Engine</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Forecast store ratings using metadata, pricing, suitabilities, update frequencies, and size. Analyze SHAP game-theoretic feature contributions.</p>
+                <button onclick="document.getElementById('nav-prediction').click()" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1">
+                  <span>Open Predictor</span> <span>&rarr;</span>
+                </button>
+              </div>
+
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3 shadow-xs animate-fadeIn">
+                <div class="p-2 w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                  📊
+                </div>
+                <h3 class="font-bold text-sm text-slate-900 dark:text-white">Competitor Benchmarking</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Compare your app statistics against thousands of real live applications filtered by direct category domains in our verified official dataset.</p>
+                <button onclick="document.getElementById('nav-competitor').click()" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center space-x-1">
+                  <span>Compare Competitors</span> <span>&rarr;</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Live Workspace Status</h4>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="text-center p-3 border border-slate-100 dark:border-slate-800/60 rounded-xl bg-slate-50/50 dark:bg-slate-950/20">
+                  <span class="block text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Database</span>
+                  <span class="text-sm font-bold text-slate-800 dark:text-slate-200">10k+ Apps</span>
+                </div>
+                <div class="text-center p-3 border border-slate-100 dark:border-slate-800/60 rounded-xl bg-slate-50/50 dark:bg-slate-950/20">
+                  <span class="block text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Model Status</span>
+                  <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">Ready</span>
+                </div>
+                <div class="text-center p-3 border border-slate-100 dark:border-slate-800/60 rounded-xl bg-slate-50/50 dark:bg-slate-950/20">
+                  <span class="block text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Category Coverage</span>
+                  <span class="text-sm font-bold text-slate-800 dark:text-slate-200">33 Fields</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page: Competitor Analysis -->
+        <div id="page-competitor" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <div class="max-w-2xl mx-auto space-y-6">
+            <!-- Page Header -->
+            <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white">Competitor Benchmarking</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Explore benchmarking details for your predicted application specifications against real applications in our official dataset.</p>
+            </div>
+
+            <!-- Empty state before execution -->
+            <div id="comp-empty-state" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-center items-center text-center py-16 min-h-[300px]">
+              <span class="text-3xl mb-3">📊</span>
+              <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">Run Rating Prediction to view competitor analysis</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-xs leading-relaxed">No prediction data found. Please run a rating prediction first, then view the automatic competitor benchmarking here.</p>
+              <button onclick="document.getElementById('nav-prediction').click()" class="mt-5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl shadow-xs transition-all duration-200">
+                Go to Rating Prediction
+              </button>
+            </div>
+
+            <!-- Loading state -->
+            <div id="comp-loading-state" class="hidden text-center space-y-4 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <div class="relative w-12 h-12 mx-auto">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-600 dark:border-indigo-500 border-t-transparent animate-spin"></div>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wide">Fetching competitor dataset metrics...</p>
+            </div>
+            
+            <!-- Container where competitor-card will be displayed -->
+            <div id="comp-card-container" class="space-y-6">
+              <!-- Section: Competitor Analysis Card -->
+              <div id="competitor-card" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5 hidden transition-colors duration-300">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Competitor Analysis</h3>
+                  <span id="competitor-category-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">Category</span>
+                </div>
+
+                <!-- Key Insights block -->
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 space-y-2">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Comparison Insights</span>
+                  <p id="competitor-insight-text" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">Your predicted rating is superior to the benchmark average in this category.</p>
+                </div>
+
+                <!-- Metrics Comparison Grid -->
+                <div class="grid grid-cols-3 gap-3">
+                  <!-- Metric 1: Rating Benchmarking -->
+                  <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-150 dark:border-slate-800/60 rounded-xl p-3 text-center">
+                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Rank Position</span>
+                    <span id="competitor-rank-val" class="text-sm font-black text-indigo-600 dark:text-indigo-400 block">Top 20%</span>
+                    <span class="text-[9px] font-medium text-slate-500 dark:text-slate-400 block mt-0.5">Category Rating</span>
+                  </div>
+                  <!-- Metric 2: Category Average Rating -->
+                  <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-150 dark:border-slate-800/60 rounded-xl p-3 text-center">
+                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Category Avg</span>
+                    <span id="competitor-avg-rating-val" class="text-sm font-black text-slate-800 dark:text-white block">4.2</span>
+                    <span class="text-[9px] font-medium text-slate-500 dark:text-slate-400 block mt-0.5">Rating Index</span>
+                  </div>
+                  <!-- Metric 3: Install Tier Comparison -->
+                  <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-150 dark:border-slate-800/60 rounded-xl p-3 text-center">
+                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Install Tier</span>
+                    <span id="competitor-install-tier" class="text-sm font-black text-emerald-600 dark:text-emerald-400 block">High Volume</span>
+                    <span class="text-[9px] font-medium text-slate-500 dark:text-slate-400 block mt-0.5">Vs Category</span>
+                  </div>
+                </div>
+
+                <!-- Install Distribution Section -->
+                <div class="space-y-3 pt-1">
+                  <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Install Distribution</h4>
+                  <div class="grid grid-cols-3 gap-2 text-center bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3">
+                    <div>
+                      <span class="block text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Min Installs</span>
+                      <span id="competitor-install-min" class="text-xs font-bold text-slate-700 dark:text-slate-300">10K</span>
+                    </div>
+                    <div class="border-x border-slate-200/50 dark:border-slate-800/50">
+                      <span class="block text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Average Installs</span>
+                      <span id="competitor-install-avg" class="text-xs font-bold text-indigo-600 dark:text-indigo-400">500K</span>
+                    </div>
+                    <div>
+                      <span class="block text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Max Installs</span>
+                      <span id="competitor-install-max" class="text-xs font-bold text-slate-700 dark:text-slate-300">10M</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Real Competitors List -->
+                <div class="space-y-2.5 pt-1">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Real Category Competitors</h4>
+                    <span class="text-[9px] font-semibold text-slate-400 dark:text-slate-500">Official Dataset</span>
+                  </div>
+                  
+                  <div id="competitors-list-container" class="space-y-2">
+                    <!-- Dynamically populated real competitor rows -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Page: Trend Analysis -->
+        <div id="page-trend" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <!-- Page Header -->
+          <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white">Trend Analysis</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Deep-dive into the temporal trends, install growth patterns, and feature-level correlations for your app category.</p>
+          </div>
+
+          <!-- Empty State (No Prediction yet) -->
+          <div id="trend-empty-state" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-center items-center text-center py-16 min-h-[300px]">
+            <span class="text-3xl mb-3">📈</span>
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">Run Rating Prediction first</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-xs leading-relaxed">No prediction data found. Please run a rating prediction first, then view the automatic macro-level trends here.</p>
+            <button onclick="document.getElementById('nav-prediction').click()" class="mt-5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl shadow-xs transition-all duration-200 font-sans cursor-pointer">
+              Go to Rating Prediction
+            </button>
+          </div>
+
+          <!-- Loading State -->
+          <div id="trend-loading-state" class="hidden text-center space-y-4 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+            <div class="relative w-12 h-12 mx-auto">
+              <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+              <div class="absolute inset-0 rounded-full border-4 border-indigo-600 dark:border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wide">Analyzing category dataset trends...</p>
+          </div>
+
+          <!-- Trend Content Container -->
+          <div id="trend-content-container" class="hidden space-y-6">
+            <!-- App Position Summary Card -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">App Market Position</h3>
+                <span id="trend-category-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">Category</span>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 text-center">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Predicted Rating</span>
+                  <span id="trend-predicted-val" class="text-2xl font-black text-indigo-600 dark:text-indigo-400 block">4.3</span>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 text-center">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Category Average</span>
+                  <span id="trend-average-val" class="text-2xl font-black text-slate-800 dark:text-white block">4.15</span>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 text-center flex flex-col justify-center items-center">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Difference</span>
+                  <div class="flex items-center space-x-1.5 mt-1">
+                    <span id="trend-diff-badge" class="text-xs font-bold px-2.5 py-1 rounded-full border">0.00</span>
+                    <span id="trend-position-label" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Near Average</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Position Explanation -->
+              <div class="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/60 rounded-xl p-4">
+                <p id="trend-position-desc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+              </div>
+            </div>
+
+            <!-- Double Grid Cards for Rating & Growth -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- Rating Trend -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Rating Trend</h3>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Average app quality score movement over the last 5 years.</p>
+                </div>
+                <!-- SVG Container -->
+                <div id="chart-rating-trend" class="h-52 w-full flex items-center justify-center"></div>
+                <!-- Insight Box -->
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                  <span class="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block mb-1">Temporal Insight</span>
+                  <p id="trend-rating-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+                </div>
+              </div>
+
+              <!-- Install Growth Trend -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Install Growth Trend</h3>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Cumulative installation volume trend of category competitors.</p>
+                </div>
+                <!-- SVG Container -->
+                <div id="chart-install-trend" class="h-52 w-full flex items-center justify-center"></div>
+                <!-- Insight Box -->
+                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                  <span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-1">Distribution Insight</span>
+                  <p id="trend-install-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Frequency VS Rating -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+              <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex justify-between items-center">
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Update Frequency vs. Rating</h3>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Core correlation between active update intervals and aggregate ratings.</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                <!-- SVG Container -->
+                <div id="chart-frequency-trend" class="md:col-span-7 h-52 w-full flex items-center justify-center"></div>
+                <!-- Insight Box -->
+                <div class="md:col-span-5 bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 self-stretch flex flex-col justify-center">
+                  <span class="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block mb-1.5">Optimization Guideline</span>
+                  <p id="trend-frequency-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-advisor" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <div class="max-w-4xl mx-auto space-y-6">
+            <!-- Page Header -->
+            <div class="border-b border-slate-200 dark:border-slate-800 pb-4">
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white">AI Advisor</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Data-driven diagnostic report and strategic recommendations optimized for your application's profile.</p>
+            </div>
+
+            <!-- Empty State (No Prediction yet) -->
+            <div id="advisor-empty-state" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-center items-center text-center py-16 min-h-[300px]">
+              <span class="text-3xl mb-3">🤖</span>
+              <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">Please predict an app first</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-xs leading-relaxed">No active diagnostic profile detected. Please run a rating prediction first to unlock personalized AI suggestions.</p>
+              <button onclick="document.getElementById('nav-prediction').click()" class="mt-5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white text-xs font-semibold rounded-xl shadow-xs transition-all duration-200 font-sans cursor-pointer">
+                Go to Rating Prediction
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="advisor-loading-state" class="hidden text-center space-y-4 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <div class="relative w-12 h-12 mx-auto">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-600 dark:border-indigo-500 border-t-transparent animate-spin"></div>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wide">Generating strategic AI diagnostics...</p>
+            </div>
+
+            <!-- Content Container -->
+            <div id="advisor-content-container" class="hidden space-y-6">
+              
+              <!-- Row 1: Final Verdict & Summary -->
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <!-- Verdict Card -->
+                <div class="md:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">Final Verdict</h3>
+                    <div id="advisor-verdict-badge" class="inline-flex items-center text-sm font-black px-3.5 py-1.5 rounded-full border">
+                      <!-- Filled dynamically -->
+                    </div>
+                  </div>
+                  <div class="border-t border-slate-100 dark:border-slate-800/80 pt-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Model Confidence</span>
+                    <span id="advisor-confidence" class="text-2xl font-black text-slate-800 dark:text-white">92%</span>
+                  </div>
+                </div>
+
+                <!-- AI Summary Card -->
+                <div class="md:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
+                  <div class="border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Executive AI Summary</h3>
+                  </div>
+                  <p id="advisor-summary-text" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    <!-- Filled dynamically -->
+                  </p>
+                </div>
+              </div>
+
+              <!-- Row 2: Market Position -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Market Position & Percentile</h3>
+                  <span id="advisor-category-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">CATEGORY</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Category Average</span>
+                    <span id="advisor-cat-avg" class="text-xl font-black text-slate-700 dark:text-slate-300">4.15</span>
+                  </div>
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Predicted Rating Diff</span>
+                    <span id="advisor-rating-diff" class="text-xl font-black text-indigo-600 dark:text-indigo-400">+0.15</span>
+                  </div>
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Competitor Percentile</span>
+                    <span id="advisor-percentile-rank" class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-sans">Top 15%</span>
+                  </div>
+                </div>
+                <p id="advisor-position-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pt-2">
+                  <!-- Filled dynamically -->
+                </p>
+              </div>
+
+              <!-- Row 3: Strengths & Risks (What impacts your rating) -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Strengths Card -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                  <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Positive Factors (What improves your rating)</h3>
+                    <span class="text-[18px]">✨</span>
+                  </div>
+                  <div id="advisor-strengths-list" class="space-y-4">
+                    <!-- Filled dynamically -->
+                  </div>
+                </div>
+
+                <!-- Risks Card -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                  <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Negative Factors (What lowers your rating)</h3>
+                    <span class="text-[18px]">⚠️</span>
+                  </div>
+                  <div id="advisor-risks-list" class="space-y-4">
+                    <!-- Filled dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Row 4: Strategic Recommendations -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Actionable Market Improvements</h3>
+                  <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Targeted Strategy</span>
+                </div>
+                <div id="advisor-improvements-list" class="space-y-4">
+                  <!-- Filled dynamically -->
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div id="page-eda-insights" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <div class="max-w-5xl mx-auto space-y-6">
+            <!-- Header -->
+            <div class="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white font-sans">Exploratory Data Analysis (EDA) Insights</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Deep empirical analysis of reference applications to identify critical levers driving store rating performance.</p>
+              </div>
+              <button id="eda-refresh-btn" class="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 text-xs font-semibold rounded-xl hover:bg-indigo-100/50 dark:hover:bg-indigo-950/60 transition-all cursor-pointer flex items-center space-x-1.5">
+                <span>🔄</span>
+                <span>Recalculate Analysis</span>
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="eda-loading-state" class="text-center space-y-4 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <div class="relative w-12 h-12 mx-auto">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-600 dark:border-indigo-500 border-t-transparent animate-spin"></div>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wide">Computing statistical dataset models dynamically...</p>
+            </div>
+
+            <!-- Content Container (hidden by default) -->
+            <div id="eda-content" class="hidden space-y-8">
+
+              <!-- 1. DATASET OVERVIEW -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">1. Reference Dataset Overview</h3>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Apps Analyzed</span>
+                    <span id="eda-total-apps" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                  </div>
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Categories</span>
+                    <span id="eda-total-categories" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                  </div>
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Global Avg Rating</span>
+                    <span id="eda-avg-rating" class="text-xl font-black text-indigo-600 dark:text-indigo-400">-</span>
+                  </div>
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 col-span-1">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Avg Install Scale</span>
+                    <span id="eda-avg-installs" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                  </div>
+                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 col-span-1">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Avg Reviews Count</span>
+                    <span id="eda-avg-reviews" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                  </div>
+                </div>
+                <p id="eda-dataset-description" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  <!-- Filled dynamically -->
+                </p>
+              </div>
+
+              <!-- 8. KEY TAKEAWAYS -->
+              <div class="bg-indigo-50/40 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-6 shadow-xs space-y-4">
+                <div class="flex items-center space-x-2">
+                  <span class="text-sm">💡</span>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 font-sans">Core Strategic Takeaways</h3>
+                </div>
+                <div id="eda-takeaways" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  <!-- Filled dynamically -->
+                </div>
+              </div>
+
+              <!-- 2. RATING INSIGHTS & DISTRIBUTION -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">2. App Rating Distribution & Competitive Ceiling</h3>
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                  <!-- Custom visual bars of distribution -->
+                  <div class="md:col-span-5 bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/80 rounded-xl p-5 space-y-3 flex flex-col justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rating Distribution Matrix</span>
+                    <div id="eda-rating-bins" class="space-y-2">
+                      <!-- Progress bars filled dynamically -->
+                    </div>
+                  </div>
+                  <!-- Insights side -->
+                  <div class="md:col-span-7 flex flex-col justify-between space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                      <div class="border border-slate-100 dark:border-slate-800 rounded-xl p-4 text-center">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">% Apps Above 4.0</span>
+                        <span id="eda-pct-above-four" class="text-lg font-black text-emerald-600 dark:text-emerald-400">-</span>
+                      </div>
+                      <div class="border border-slate-100 dark:border-slate-800 rounded-xl p-4 text-center">
+                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">% Apps Below 3.5</span>
+                        <span id="eda-pct-below-three-five" class="text-lg font-black text-rose-600 dark:text-rose-400">-</span>
+                      </div>
+                    </div>
+                    <p id="eda-rating-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                      <!-- Filled dynamically -->
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. CATEGORY PERFORMANCE -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">3. Category-Specific Benchmark Discrepancies</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <!-- Top 5 Categories -->
+                  <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center justify-between">
+                      <span>Highest Rated Categories</span>
+                      <span>📈</span>
+                    </h4>
+                    <div id="eda-top-categories" class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <!-- List items loaded dynamically -->
+                    </div>
+                  </div>
+                  <!-- Lowest 5 Categories -->
+                  <div class="space-y-3">
+                    <h4 class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest flex items-center justify-between">
+                      <span>Lowest Rated Categories</span>
+                      <span>📉</span>
+                    </h4>
+                    <div id="eda-bottom-categories" class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <!-- List items loaded dynamically -->
+                    </div>
+                  </div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
+                  <p id="eda-category-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    <!-- Filled dynamically -->
+                  </p>
+                </div>
+              </div>
+
+              <!-- 4. USER ENGAGEMENT, 5. UPDATE INSIGHTS, 6. ADS & PRICING -->
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- User Engagement -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
+                  <div class="space-y-2">
+                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">4. User Engagement Impact</h3>
+                    <div class="border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Scale vs. Rating Expectations</h4>
+                    </div>
+                    <div class="space-y-2.5 pt-1">
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400">High Install Avg Rating</span>
+                        <span id="eda-high-installs-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400">Low Install Avg Rating</span>
+                        <span id="eda-low-installs-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400">High Reviews Avg Rating</span>
+                        <span id="eda-high-reviews-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400">Low Reviews Avg Rating</span>
+                        <span id="eda-low-reviews-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p id="eda-engagement-explanation" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <!-- Filled dynamically -->
+                  </p>
+                </div>
+
+                <!-- Update Insights -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
+                  <div class="space-y-2">
+                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">5. Update Recency Lever</h3>
+                    <div class="border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Active Patch Cycles vs. Stagnation</h4>
+                    </div>
+                    <div class="space-y-2.5 pt-1">
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Frequent Updates (≤45d)</span>
+                        <span id="eda-freq-updates-rating" class="font-bold text-emerald-600 dark:text-emerald-400">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Rare Updates (>45d)</span>
+                        <span id="eda-rare-updates-rating" class="font-bold text-rose-600 dark:text-rose-400">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs font-medium">
+                        <span class="text-slate-500 dark:text-slate-400">Update Rating Correlation</span>
+                        <span id="eda-update-rating-corr" class="font-bold text-slate-700 dark:text-slate-300">-</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p id="eda-update-explanation" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <!-- Filled dynamically -->
+                  </p>
+                </div>
+
+                <!-- Ads & Pricing -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
+                  <div class="space-y-2">
+                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">6. Ads & Monetization Structure</h3>
+                    <div class="border-b border-slate-100 dark:border-slate-800/80 pb-2">
+                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Revenue Mechanics Impact</h4>
+                    </div>
+                    <div class="space-y-2.5 pt-1">
+                      <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400 font-medium">Ad-Free Rating (No Ads)</span>
+                        <span id="eda-no-ads-rating" class="font-bold text-emerald-600 dark:text-emerald-400">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs font-medium">
+                        <span class="text-slate-500 dark:text-slate-400">Ad-Supported Rating (Yes)</span>
+                        <span id="eda-ads-rating" class="font-bold text-rose-600 dark:text-rose-400">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs font-medium">
+                        <span class="text-slate-500 dark:text-slate-400">Paid Application Rating</span>
+                        <span id="eda-paid-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
+                      </div>
+                      <div class="flex justify-between items-center text-xs font-medium">
+                        <span class="text-slate-500 dark:text-slate-400">Free Application Rating</span>
+                        <span id="eda-free-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p id="eda-monetization-explanation" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <!-- Filled dynamically -->
+                  </p>
+                </div>
+              </div>
+
+              <!-- 7. FEATURE RELATIONSHIPS (CORRELATIONS) -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">7. Statistical Feature Relationships (Pearson Correlation Coefficients)</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <!-- Correlation Progress Bars -->
+                  <div class="lg:col-span-6 space-y-3 bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/80 rounded-xl p-5">
+                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Linear Relationship Intensity with App Rating</span>
+                    <div id="eda-correlation-list" class="space-y-3">
+                      <!-- Progress bars filled dynamically -->
+                    </div>
+                  </div>
+                  <!-- Explanatory description -->
+                  <div class="lg:col-span-6 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                      <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">How to Interpret Correlations</h4>
+                      <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        <p><strong>Pearson Correlation Coefficient (r)</strong> ranges from <strong>-1.0 to +1.0</strong>. It quantifies the strength and direction of the linear relationship between application features and their predicted rating outcomes.</p>
+                        <p class="pl-3 border-l-2 border-emerald-500"><strong>Positive Coefficient (+r)</strong>: Indicates that as the attribute increases, the application rating tends to increase as well (e.g. higher review engagement ratios or active updates).</p>
+                        <p class="pl-3 border-l-2 border-rose-500"><strong>Negative Coefficient (-r)</strong>: Indicates that as the attribute increases, the rating tends to decrease (e.g. longer stagnation cycles, bloated file sizes, or aggressive ad modules).</p>
+                      </div>
+                    </div>
+                    <div class="bg-indigo-50/20 dark:bg-indigo-950/20 border border-indigo-100/40 dark:border-indigo-900/40 rounded-xl p-4">
+                      <p class="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed font-medium">
+                        <strong>Practical Interpretation</strong>: Features with values closer to <strong>+1.0</strong> or <strong>-1.0</strong> represent the strongest levers for your product strategy. Focus on maximizing positive attributes and strictly eliminating negative drag factors to maximize storefront standing.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div id="page-eda-dashboard" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <div class="max-w-5xl mx-auto space-y-6">
+            <!-- Header -->
+            <div class="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white font-sans">EDA Empirical Dashboard</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Interactive statistical and visual reports computed directly from our store reference database.</p>
+              </div>
+              <button id="eda-dash-refresh-btn" class="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 text-xs font-semibold rounded-xl hover:bg-indigo-100/50 dark:hover:bg-indigo-950/60 transition-all cursor-pointer flex items-center space-x-1.5">
+                <span>🔄</span>
+                <span>Refresh Metrics</span>
+              </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="eda-dash-loading-state" class="text-center space-y-4 py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <div class="relative w-12 h-12 mx-auto">
+                <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-600 dark:border-indigo-500 border-t-transparent animate-spin"></div>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wide">Rendering interactive charts from dataset models...</p>
+            </div>
+
+            <!-- Dashboard Content Container (hidden by default) -->
+            <div id="eda-dash-content" class="hidden space-y-6">
+
+              <!-- SECTION 1: KPIs (Single row) -->
+              <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Apps</span>
+                  <span id="dash-kpi-apps" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Categories</span>
+                  <span id="dash-kpi-categories" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Avg Rating</span>
+                  <span id="dash-kpi-rating" class="text-xl font-black text-indigo-600 dark:text-indigo-400">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Reviews</span>
+                  <span id="dash-kpi-reviews" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Installs</span>
+                  <span id="dash-kpi-installs" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+                </div>
+              </div>
+
+              <!-- SECTION 2 & SECTION 3 (Two column layout) -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- SECTION 2: RATING DISTRIBUTION -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Rating Distribution (Histogram)</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Empirical count of applications falling across rating buckets from 1.0 to 5.0, overlaid with the mathematical mean.</p>
+                  </div>
+                  <div id="dash-hist-container" class="w-full h-56 relative bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-2 flex items-center justify-center">
+                    <!-- SVG drawn dynamically -->
+                  </div>
+                </div>
+
+                <!-- SECTION 3: CATEGORY ANALYSIS -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Top 10 Categories by Avg Rating</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Average store ratings across the top-performing market niches, sorted descending.</p>
+                  </div>
+                  <div id="dash-bar-container" class="space-y-2 pt-2 bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-4">
+                    <!-- Bars drawn dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 4: RELATIONSHIPS -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Scatter 1: Reviews vs Rating -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 relative">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Reviews vs App Rating</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Scatter plot mapping user reviews counts to overall rating scores. Hover points for details.</p>
+                  </div>
+                  <div id="dash-scatter-reviews" class="w-full h-64 relative bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-2 flex items-center justify-center">
+                    <!-- SVG drawn dynamically -->
+                  </div>
+                </div>
+
+                <!-- Scatter 2: Installs vs Rating -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 relative">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Installs vs App Rating</h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Scatter plot mapping total installs scale to overall rating scores. Hover points for details.</p>
+                  </div>
+                  <div id="dash-scatter-installs" class="w-full h-64 relative bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-2 flex items-center justify-center">
+                    <!-- SVG drawn dynamically -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Shared Interactive Scatter Tooltip -->
+              <div id="scatter-tooltip" class="absolute hidden z-50 pointer-events-none bg-slate-900/95 dark:bg-slate-950/95 text-white text-[10px] font-semibold px-3 py-2 rounded-xl shadow-lg border border-slate-700/50 backdrop-blur-xs flex flex-col space-y-0.5 max-w-xs transition-opacity duration-150">
+                <!-- Tooltip content filled dynamically -->
+              </div>
+
+              <!-- SECTION 5: CORRELATION -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
+                <div>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Feature Correlation Matrix (Heatmap)</h3>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Computed Pearson coefficients showing relationships across numeric store dimensions. Positive correlations are highlighted in green, negative values in red.</p>
+                </div>
+                <div class="max-w-xl mx-auto pt-2 overflow-x-auto">
+                  <div id="dash-heatmap-container" class="min-w-[340px] bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-4">
+                    <!-- Heatmap grid drawn dynamically -->
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div id="page-history" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <div class="max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs text-center py-12">
+            <span class="text-3xl">⏳</span>
+            <h2 class="text-sm font-bold text-slate-700 dark:text-slate-300 mt-4">Diagnostic History Logs</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Review previous runs, compared scores, and saved diagnostic report records. Your prediction trace is locally persisted in session memory.</p>
+          </div>
+        </div>
+
+        <div id="page-about" class="page-container p-4 md:p-8 space-y-6 hidden">
+          <div class="max-w-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs text-left space-y-4">
+            <h2 class="text-sm font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">About RateIQ</h2>
+            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">RateIQ is a predictive analytics and diagnostic workstation built to optimize mobile storefront storefronts. It combines SHAP (Shapley Additive exPlanations) model interpretations with a local dataset to help product teams maximize visibility and rating benchmarks.</p>
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-3">
+              <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 block">Version Reference</span>
+              <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 block">Enterprise Predictor Suite v3.0 (2026 Edition)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating Prediction Content Frame -->
+        <main id="page-prediction" class="page-container p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <!-- Left Panel: Input Control Center (lg:col-span-6) -->
+      <section class="lg:col-span-6 space-y-6">
+        
+        <!-- Section: Dual Input Mode -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5 transition-colors duration-300">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Input Mode</h2>
+          </div>
+
+          <!-- Dual Mode Switch Tabs -->
+          <div class="flex border-b border-slate-200 dark:border-slate-800">
+            <button 
+              id="tab-url-mode" 
+              type="button" 
+              class="flex-1 pb-3 text-sm font-semibold border-b-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 dark:border-indigo-400 transition-all duration-200"
+            >
+              URL Mode
+            </button>
+            <button 
+              id="tab-name-mode" 
+              type="button" 
+              class="flex-1 pb-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-all duration-200"
+            >
+              App Name Mode
+            </button>
+          </div>
+
+          <!-- Tab Content A: URL Mode -->
+          <div id="url-mode-content" class="space-y-4">
+            <div>
+              <label for="url-input" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Application Store URL</label>
+              <input 
+                id="url-input" 
+                type="text" 
+                placeholder="https://play.google.com/store/apps/details?id=com.spotify.music" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+            <div class="flex space-x-3 pt-1">
+              <button 
+                id="clear-url-btn" 
+                type="button"
+                class="w-1/3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-medium py-2.5 px-4 rounded-xl text-xs transition-colors"
+              >
+                Clear URL
+              </button>
+              <button 
+                id="fetch-url-btn" 
+                type="button"
+                class="w-2/3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center space-x-2"
+              >
+                <span id="fetch-url-text">Fetch Store Data</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Content B: App Name Mode -->
+          <div id="name-mode-content" class="space-y-4 hidden">
+            <div>
+              <label for="name-input" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Application Brand Name</label>
+              <input 
+                id="name-input" 
+                type="text" 
+                placeholder="e.g., Minecraft, Facebook, Spotify" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+            <div class="flex space-x-3 pt-1">
+              <button 
+                id="clear-name-btn" 
+                type="button"
+                class="w-1/3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-medium py-2.5 px-4 rounded-xl text-xs transition-colors"
+              >
+                Clear Name
+              </button>
+              <button 
+                id="extract-name-btn" 
+                type="button"
+                class="w-2/3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-sm flex items-center justify-center space-x-2"
+              >
+                <span id="extract-name-text">Extract From Name</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Resolved App Name Banner -->
+          <div id="resolved-banner" class="hidden bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/30 rounded-xl p-3 flex items-center justify-between">
+            <span class="text-xs text-indigo-800 dark:text-indigo-300 font-medium">App Name:</span>
+            <span id="resolved-app-name" class="text-xs font-bold text-indigo-950 dark:text-indigo-200 bg-indigo-100 dark:bg-indigo-900/60 px-3 py-1 rounded-md">Extracted App Store App</span>
+          </div>
+        </div>
+
+        <!-- Section: App Specifications Form -->
+        <form id="specs-form" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5 transition-colors duration-300">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">App Details</h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- App Name (Read only sync field / or editable) -->
+            <div class="sm:col-span-2">
+              <label for="app-name" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">App Name</label>
+              <input 
+                id="app-name" 
+                type="text" 
+                required
+                placeholder="Enter application name" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+
+            <!-- Category -->
+            <div>
+              <label for="category" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Category Domain</label>
+              <select 
+                id="category" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              >
+                <option value="GAME">GAME</option>
+                <option value="FAMILY">FAMILY</option>
+                <option value="TOOLS">TOOLS</option>
+                <option value="PRODUCTIVITY">PRODUCTIVITY</option>
+                <option value="COMMUNICATION">COMMUNICATION</option>
+                <option value="SOCIAL">SOCIAL</option>
+                <option value="PHOTOGRAPHY">PHOTOGRAPHY</option>
+                <option value="VIDEO_PLAYERS">VIDEO PLAYERS</option>
+                <option value="NEWS_AND_MAGAZINES">NEWS AND MAGAZINES</option>
+                <option value="MAPS_AND_NAVIGATION">MAPS AND NAVIGATION</option>
+                <option value="ART_AND_DESIGN">ART AND DESIGN</option>
+                <option value="AUTO_AND_VEHICLES">AUTO AND VEHICLES</option>
+                <option value="BEAUTY">BEAUTY</option>
+                <option value="BOOKS_AND_REFERENCE">BOOKS AND REFERENCE</option>
+                <option value="BUSINESS">BUSINESS</option>
+                <option value="COMICS">COMICS</option>
+                <option value="DATING">DATING</option>
+                <option value="EDUCATION">EDUCATION</option>
+                <option value="ENTERTAINMENT">ENTERTAINMENT</option>
+                <option value="EVENTS">EVENTS</option>
+                <option value="FINANCE">FINANCE</option>
+                <option value="FOOD_AND_DRINK">FOOD AND DRINK</option>
+                <option value="HEALTH_AND_FITNESS">HEALTH AND FITNESS</option>
+                <option value="HOUSE_AND_HOME">HOUSE AND HOME</option>
+                <option value="LIBRARIES_AND_DEMO">LIBRARIES AND DEMO</option>
+                <option value="LIFESTYLE">LIFESTYLE</option>
+                <option value="MEDICAL">MEDICAL</option>
+                <option value="SHOPPING">SHOPPING</option>
+                <option value="PERSONALIZATION">PERSONALIZATION</option>
+                <option value="PARENTING">PARENTING</option>
+                <option value="WEATHER">WEATHER</option>
+              </select>
+            </div>
+
+            <!-- Installs Dropdown (RESTRICTED TO DROPDOWN) -->
+            <div>
+              <label for="installs" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Installs Index</label>
+              <select 
+                id="installs" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              >
+                <option value="100">100+</option>
+                <option value="500">500+</option>
+                <option value="1000">1,000+</option>
+                <option value="5000">5,000+</option>
+                <option value="10000" selected>10,000+</option>
+                <option value="50000">50,000+</option>
+                <option value="100000">100,000+</option>
+                <option value="500000">500,000+</option>
+                <option value="1000000">1,000,000+</option>
+                <option value="5000000">5,000,000+</option>
+                <option value="10000000">10,000,000+</option>
+                <option value="50000000">50,000,000+</option>
+                <option value="100000000">100,000,000+</option>
+                <option value="500000000">500,000,000+</option>
+                <option value="1000000000">1,000,000,000+</option>
+              </select>
+            </div>
+
+            <!-- Size in MB -->
+            <div>
+              <label for="size" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Size (MB)</label>
+              <input 
+                id="size" 
+                type="number" 
+                min="0.1" 
+                step="0.1"
+                value="24.5" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+
+            <!-- Price in USD -->
+            <div>
+              <label for="price" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Price ($)</label>
+              <input 
+                id="price" 
+                type="number" 
+                min="0" 
+                step="0.01"
+                value="0.00" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+
+            <!-- App Type -->
+            <div>
+              <label for="app-type" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Monetization Type</label>
+              <select 
+                id="app-type" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              >
+                <option value="Free">Free</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+
+            <!-- Contains Ads (PRO DESIGN TOGGLE) -->
+            <div>
+              <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Contains Ads</label>
+              <div class="flex rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-slate-950 p-1">
+                <button 
+                  id="toggle-ads-yes" 
+                  type="button" 
+                  class="flex-1 text-center py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-indigo-600 text-white dark:bg-indigo-500"
+                >
+                  Yes
+                </button>
+                <button 
+                  id="toggle-ads-no" 
+                  type="button" 
+                  class="flex-1 text-center py-1.5 text-xs font-medium rounded-lg transition-all duration-200 text-slate-600 dark:text-slate-400"
+                >
+                  No
+                </button>
+              </div>
+              <input type="hidden" id="ads" value="Yes" />
+            </div>
+
+            <!-- Content Rating -->
+            <div>
+              <label for="content-rating" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Content Suitability</label>
+              <select 
+                id="content-rating" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              >
+                <option value="Everyone">Everyone</option>
+                <option value="Everyone 10+">Everyone 10+</option>
+                <option value="Teen">Teen</option>
+                <option value="Mature 17+">Mature 17+</option>
+                <option value="Adults only 18+">Adults only 18+</option>
+                <option value="Unrated">Unrated</option>
+              </select>
+            </div>
+
+            <!-- Reviews Count -->
+            <div>
+              <label for="reviews" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Reviews Volume</label>
+              <input 
+                id="reviews" 
+                type="number" 
+                min="0"
+                value="250" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+
+            <!-- Days Since Last Update (RESTRICTED TO NUMBER INPUT - NO SLIDERS) -->
+            <div class="sm:col-span-2">
+              <label for="last-updated" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">Last Updated (Days Ago)</label>
+              <input 
+                id="last-updated" 
+                type="number" 
+                min="1" 
+                max="3650"
+                value="30" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+          </div>
+
+          <!-- Reviews vs Installs warning container -->
+          <div id="warning-box" class="hidden bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl p-3 text-xs text-amber-700 dark:text-amber-300 transition-colors">
+            Warning: The reviews volume is larger than the installs index, which is statistically non-standard for live applications.
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex space-x-3 pt-2">
+            <button 
+              id="clear-btn" 
+              type="button"
+              class="w-1/3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-semibold py-3 px-4 rounded-xl text-xs transition-colors"
+            >
+              Reset All
+            </button>
+            <button 
+              id="predict-btn" 
+              type="submit"
+              class="w-2/3 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all shadow-md active:scale-98"
+            >
+              Predict Rating
+            </button>
+          </div>
+        </form>
+
+        <!-- Section: What-If Simulation sandbox -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-5 transition-colors duration-300">
+          <div class="flex items-center justify-between">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">What-If Analysis</h2>
+            <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Sandbox Engine</span>
+          </div>
+          
+          <p class="text-xs text-slate-500 dark:text-slate-400">Simulate how hypothetical code optimizations or monetizing adjustments impact your forecast store performance.</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Sandbox Reviews -->
+            <div>
+              <label for="wi-reviews" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">What-If Reviews</label>
+              <input 
+                id="wi-reviews" 
+                type="number" 
+                min="0"
+                value="250" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+
+            <!-- Sandbox Installs (Dropdown) -->
+            <div>
+              <label for="wi-installs" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">What-If Installs</label>
+              <select 
+                id="wi-installs" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2.5 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              >
+                <option value="100">100+</option>
+                <option value="500">500+</option>
+                <option value="1000">1,000+</option>
+                <option value="5000">5,000+</option>
+                <option value="10000" selected>10,000+</option>
+                <option value="50000">50,000+</option>
+                <option value="100000">100,000+</option>
+                <option value="500000">500,000+</option>
+                <option value="1000000">1,000,000+</option>
+                <option value="5000000">5,000,000+</option>
+                <option value="10000000">10,000,000+</option>
+                <option value="50000000">50,000,000+</option>
+                <option value="100000000">100,000,000+</option>
+                <option value="500000000">500,000,000+</option>
+                <option value="1000000000">1,000,000,000+</option>
+              </select>
+            </div>
+
+            <!-- Sandbox App Size -->
+            <div>
+              <label for="wi-size" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">What-If Size (MB)</label>
+              <input 
+                id="wi-size" 
+                type="number" 
+                min="0.1"
+                step="0.1"
+                value="24.5" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+
+            <!-- Sandbox Update Days -->
+            <div>
+              <label for="wi-last-updated" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">What-If Update Recency (Days)</label>
+              <input 
+                id="wi-last-updated" 
+                type="number" 
+                min="1"
+                value="30" 
+                class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2.5 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors"
+              />
+            </div>
+
+            <!-- Sandbox Ads (Toggle) -->
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">What-If Contains Ads</label>
+              <div class="flex rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden bg-slate-100 dark:bg-slate-950 p-1">
+                <button 
+                  id="toggle-wi-ads-yes" 
+                  type="button" 
+                  class="flex-1 text-center py-1.5 text-xs font-bold rounded-lg transition-all duration-200 bg-indigo-600 text-white dark:bg-indigo-500"
+                >
+                  Yes
+                </button>
+                <button 
+                  id="toggle-wi-ads-no" 
+                  type="button" 
+                  class="flex-1 text-center py-1.5 text-xs font-medium rounded-lg transition-all duration-200 text-slate-600 dark:text-slate-400"
+                >
+                  No
+                </button>
+              </div>
+              <input type="hidden" id="wi-ads" value="Yes" />
+            </div>
+          </div>
+
+          <button 
+            id="simulate-btn" 
+            type="button"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all shadow-md active:scale-98 flex items-center justify-center space-x-2"
+          >
+            <span>Simulate Rating Change</span>
+          </button>
+
+          <!-- Simulation Result Display -->
+          <div id="simulation-result-box" class="hidden bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3 transition-colors">
+            <div class="flex justify-between items-center border-b border-slate-200/50 dark:border-slate-800/80 pb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Simulation Result Summary</span>
+              <span id="wi-impact-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Low Impact</span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <span class="block text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Base Rating</span>
+                <span id="wi-rating-base" class="text-base font-bold text-slate-700 dark:text-slate-300">4.1</span>
+              </div>
+              <div>
+                <span class="block text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Simulated</span>
+                <span id="wi-rating-sim" class="text-base font-bold text-indigo-600 dark:text-indigo-400">4.3</span>
+              </div>
+              <div>
+                <span class="block text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Difference</span>
+                <span id="wi-rating-diff" class="text-base font-black text-emerald-600 dark:text-emerald-400">+0.2</span>
+              </div>
+            </div>
+
+            <div class="bg-indigo-50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/20 rounded-lg p-3">
+              <p id="wi-explanation" class="text-xs text-indigo-950 dark:text-indigo-300 leading-relaxed">Adjustments are projected to slightly accelerate rating velocity through positive metadata changes.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Analytical Dashboard Results (lg:col-span-6) -->
+      <section class="lg:col-span-6 space-y-6">
+        
+        <!-- Result Presentation Section -->
+        <div id="results-card" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-center min-h-[380px] transition-colors duration-300">
+          
+          <!-- Empty State (No Prediction yet) -->
+          <div id="empty-state" class="text-center space-y-4 py-16">
+            <img src="/logo.ico" class="mx-auto h-12 w-12 opacity-80" alt="RateIQ" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22 width=%2232%22 height=%2232%22><text y=%2222%22 font-size=%2224%22>⭐</text></svg>'">
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300">Awaiting App Specifications</h3>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading-state" class="hidden text-center space-y-4 py-16">
+            <div class="relative w-12 h-12 mx-auto">
+              <div class="absolute inset-0 rounded-full border-4 border-slate-100 dark:border-slate-800"></div>
+              <div class="absolute inset-0 rounded-full border-4 border-indigo-600 dark:border-indigo-500 border-t-transparent animate-spin"></div>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-semibold tracking-wide">Executing prediction and computing SHAP game-theoretic impacts...</p>
+          </div>
+
+          <!-- Prediction Result Data -->
+          <div id="result-content" class="hidden space-y-6">
+            <div class="border-b border-slate-100 dark:border-slate-800 pb-4">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Analysis Assessment</span>
+              <h2 class="text-lg font-extrabold text-slate-900 dark:text-white mt-1" id="result-title">Analysis Report</h2>
+            </div>
+
+            <!-- KPI Metric Cards -->
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-left transition-colors">
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Predicted Rating</span>
+                <span class="text-2xl font-black text-slate-900 dark:text-white mt-1 block" id="rating-metric">0.0 / 5.0</span>
+                <span class="text-[9px] font-mono text-indigo-600 dark:text-indigo-400 block mt-1" id="source-metric">Fallback API Engine</span>
+              </div>
+              <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-xl p-4 text-left transition-colors">
+                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Model Confidence</span>
+                <span class="text-2xl font-black text-slate-900 dark:text-white mt-1 block" id="confidence-metric">0%</span>
+                <span class="text-[9px] font-medium text-emerald-600 dark:text-emerald-400 block mt-1">Classification Match</span>
+              </div>
+            </div>
+
+            <!-- Market Trend Comparison Module -->
+            <div id="market-trend" class="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Market Trend Comparison</h3>
+                <span id="market-variance-pill" class="text-[10px] font-black bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 px-2 py-0.5 rounded-md">+0.0 Variance</span>
+              </div>
+              
+              <div class="space-y-3 bg-slate-50 dark:bg-slate-950/30 border border-slate-200 dark:border-slate-800/60 rounded-xl p-4">
+                <!-- App rating bar -->
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="font-medium text-slate-700 dark:text-slate-300">Your App Score</span>
+                    <span id="trend-app-score" class="font-bold text-slate-900 dark:text-white">0.0</span>
+                  </div>
+                  <div class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                    <div id="trend-app-bar" class="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full" style="width: 0%"></div>
+                  </div>
+                </div>
+
+                <!-- Category benchmark bar -->
+                <div class="space-y-1">
+                  <div class="flex justify-between items-center text-xs">
+                    <span id="trend-cat-name" class="font-medium text-slate-500 dark:text-slate-400">Category Avg Benchmark</span>
+                    <span id="trend-cat-score" class="font-bold text-slate-600 dark:text-slate-400">4.1</span>
+                  </div>
+                  <div class="w-full bg-slate-200 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                    <div id="trend-cat-bar" class="bg-slate-400 dark:bg-slate-600 h-full rounded-full" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SHAP Bar Chart Section -->
+            <div class="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">SHAP Feature Impact Analysis</h3>
+              </div>
+              
+              <!-- Container for dynamically rendered horizontal bars -->
+              <div id="shap-bars" class="space-y-3.5 pt-1">
+                <!-- Bars are added dynamically by vanilla JavaScript -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Section: Structured Recommendations List -->
+        <div id="recommendations-card" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4 hidden transition-colors duration-300">
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Optimization Recommendations</h3>
+          </div>
+
+          <div id="recommendations-list" class="space-y-3">
+            <!-- Dynamic list of recommendations categorized correctly -->
+          </div>
+        </div>
+      </section>
+
+    </main> <!-- end of page-prediction -->
+    </main> <!-- end of main content scroll container -->
+    </div> <!-- end of sidebar layout flex-row wrapper -->
+
+    <!-- Professional Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 py-5 px-6 text-center text-xs text-slate-400 dark:text-slate-500 shrink-0 transition-colors duration-300">
+      RateIQ Predictive Engine &copy; 2026.
+    </footer>
+
+    <!-- Frontend logic script -->
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
