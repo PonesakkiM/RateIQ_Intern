@@ -1,0 +1,29 @@
+# Exclude Python bytecode and virtual environment directories
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.venv/
+venv/
+ENV/
+env/
+
+# Exclude git directories
+.git/
+.gitignore
+
+# Exclude Node.js directories and build artifacts
+node_modules/
+dist/
+.next/
+out/
+build/
+
+# Exclude large data files or local temporary files
+*.csv
+*.xlsx
+*.sqlite
+*.log
+tmp/
+temp/
+.DS_Store

@@ -3,6 +3,29 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 
+try {
+  const logoBase64Path = path.join(process.cwd(), "logo_base64.txt");
+  if (fs.existsSync(logoBase64Path)) {
+    const base64Content = fs.readFileSync(logoBase64Path, "utf-8").trim();
+    if (base64Content && !base64Content.startsWith("#")) {
+      const buffer = Buffer.from(base64Content, "base64");
+      
+      const pathsToSave = [
+        path.join(process.cwd(), "logo.jpg"),
+        path.join(process.cwd(), "frontend", "logo.jpg"),
+        path.join(process.cwd(), "public", "logo.jpg")
+      ];
+      
+      pathsToSave.forEach(p => {
+        fs.writeFileSync(p, buffer);
+        console.log(`SUCCESSFULLY RESTORED logo.jpg to ${p}`);
+      });
+    }
+  }
+} catch (e) {
+  console.error("Error restoring logo.jpg from base64 text file:", e);
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -767,6 +790,69 @@ async function startServer() {
 
     } catch (err: any) {
       res.status(500).json({ error: "Failed to generate EDA dashboard data: " + err.message });
+    }
+  });
+
+  // API Route: Get Prediction History
+  app.get("/api/history", (req, res) => {
+    try {
+      const historyPath = path.join(process.cwd(), "public", "history.json");
+      if (!fs.existsSync(historyPath)) {
+        return res.json([]);
+      }
+      const rawData = fs.readFileSync(historyPath, "utf-8");
+      const history = JSON.parse(rawData);
+      res.json(history);
+    } catch (e: any) {
+      res.json([]);
+    }
+  });
+
+  // API Route: Save Prediction History
+  app.post("/api/history", (req, res) => {
+    try {
+      const historyPath = path.join(process.cwd(), "public", "history.json");
+      let history: any[] = [];
+      if (fs.existsSync(historyPath)) {
+        try {
+          const rawData = fs.readFileSync(historyPath, "utf-8");
+          history = JSON.parse(rawData);
+        } catch (e) {
+          history = [];
+        }
+      }
+      
+      const newRecord = {
+        id: "hist_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+        ...req.body,
+        date: new Date().toISOString()
+      };
+
+      history.unshift(newRecord); // newest first
+      fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), "utf-8");
+      res.json({ success: true, record: newRecord });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // API Route: Delete History Record
+  app.delete("/api/history/:id", (req, res) => {
+    try {
+      const { id } = req.params;
+      const historyPath = path.join(process.cwd(), "public", "history.json");
+      if (!fs.existsSync(historyPath)) {
+        return res.json({ success: true });
+      }
+      
+      const rawData = fs.readFileSync(historyPath, "utf-8");
+      let history = JSON.parse(rawData);
+      history = history.filter((h: any) => h.id !== id);
+      
+      fs.writeFileSync(historyPath, JSON.stringify(history, null, 2), "utf-8");
+      res.json({ success: true });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
     }
   });
 

@@ -543,9 +543,11 @@ document.addEventListener("DOMContentLoaded", () => {
                   ${formatInstalls(comp.installs)} Installs &bull; ${comp.reviews.toLocaleString()} Reviews
                 </div>
               </div>
-              <div class="flex items-center space-x-1.5">
+              <div class="flex items-center space-x-1">
                 <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${comp.rating.toFixed(1)}</span>
-                <span class="text-amber-500">★</span>
+                <svg class="h-3 w-3 text-amber-500 fill-current" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
               </div>
             `;
             competitorsListContainer.appendChild(compRow);
@@ -566,6 +568,61 @@ document.addEventListener("DOMContentLoaded", () => {
       competitorCard.classList.add("hidden");
     } finally {
       if (compLoading) compLoading.classList.add("hidden");
+    }
+  }
+
+  // Helper: Save prediction result to backend history
+  async function savePredictionToHistory(payload: any, rating: number, confidence: number, shap_values: Record<string, number>) {
+    try {
+      const compRes = await fetch("/api/competitor-analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: payload.category,
+          rating: rating,
+          installs: payload.installs,
+          reviews: payload.reviews,
+          appName: payload.app_name
+        })
+      });
+      let categoryAverage = 4.2;
+      let percentileRank = 50;
+      if (compRes.ok) {
+        const compData = await compRes.json();
+        categoryAverage = compData.averageRating || 4.2;
+        percentileRank = compData.percentileRank !== undefined ? compData.percentileRank : 50;
+      }
+
+      const inputMode = (currentInputMode === "url") ? "URL" : "Manual";
+
+      const historyRecord = {
+        appName: payload.app_name,
+        category: payload.category,
+        rating: rating,
+        confidence: confidence,
+        inputMode: inputMode,
+        payload: {
+          installs: payload.installs,
+          size: payload.size,
+          price: payload.price,
+          app_type: payload.app_type,
+          contains_ads: payload.contains_ads,
+          content_rating: payload.content_rating,
+          reviews: payload.reviews,
+          last_updated_days: payload.last_updated_days
+        },
+        shap_values: shap_values,
+        percentileRank: percentileRank,
+        categoryAverage: categoryAverage
+      };
+
+      await fetch("/api/history", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(historyRecord)
+      });
+    } catch (e) {
+      console.error("Failed to automatically save prediction history:", e);
     }
   }
 
@@ -646,6 +703,9 @@ document.addEventListener("DOMContentLoaded", () => {
       renderMarketTrend(category, rating);
       renderRecommendations(data.shap_values || {}, ads, reviews, installs, lastUpdatedDays);
       await renderCompetitorAnalysis(category, rating, installs, reviews, appName);
+
+      // Save prediction report automatically in history
+      await savePredictionToHistory(payload, rating, data.confidence || 92, data.shap_values || {});
 
       // Set visibility
       loadingState.classList.add("hidden");
@@ -2020,22 +2080,557 @@ document.addEventListener("DOMContentLoaded", () => {
     edaDashRefreshBtn.addEventListener("click", updateEdaDashboardView);
   }
 
+  // ==========================================
+  // PHASE 11: DIAGNOSTIC HISTORY WORKSPACE
+  // ==========================================
+  let loadedHistoryRecords: any[] = [];
+  let selectedHistoryIds: string[] = [];
+
+  // Elements
+  const historyCompareBtn = document.getElementById("history-compare-btn") as HTMLButtonElement;
+  const historyRefreshBtn = document.getElementById("history-refresh-btn");
+  const historyFilterSearch = document.getElementById("history-filter-search") as HTMLInputElement;
+  const historyFilterCategory = document.getElementById("history-filter-category") as HTMLSelectElement;
+  const historyFilterMode = document.getElementById("history-filter-mode") as HTMLSelectElement;
+  const historySort = document.getElementById("history-sort") as HTMLSelectElement;
+  const historyClearFilters = document.getElementById("history-clear-filters");
+
+  const historyLoadingState = document.getElementById("history-loading-state");
+  const historyEmptyState = document.getElementById("history-empty-state");
+  const historyGridContainer = document.getElementById("history-grid-container");
+
+  // Modals
+  const historyDetailModal = document.getElementById("history-detail-modal");
+  const historyDetailClose = document.getElementById("history-detail-close");
+  const historyCompareModal = document.getElementById("history-compare-modal");
+  const historyCompareClose = document.getElementById("history-compare-close");
+
+  async function updateHistoryView() {
+    if (!historyLoadingState || !historyEmptyState || !historyGridContainer) return;
+    
+    historyLoadingState.classList.remove("hidden");
+    historyEmptyState.classList.add("hidden");
+    historyGridContainer.classList.add("hidden");
+    selectedHistoryIds = [];
+    updateCompareButtonState();
+
+    try {
+      const response = await fetch("/api/history");
+      if (!response.ok) throw new Error("Failed to load history list");
+      loadedHistoryRecords = await response.json();
+      renderHistoryItems();
+    } catch (e) {
+      console.error(e);
+      loadedHistoryRecords = [];
+      renderHistoryItems();
+    } finally {
+      historyLoadingState.classList.add("hidden");
+    }
+  }
+
+  function updateCompareButtonState() {
+    if (!historyCompareBtn) return;
+    historyCompareBtn.textContent = `Compare Selected (${selectedHistoryIds.length}/2)`;
+    historyCompareBtn.disabled = selectedHistoryIds.length !== 2;
+  }
+
+  function renderHistoryItems() {
+    if (!historyGridContainer || !historyEmptyState) return;
+
+    const query = historyFilterSearch ? historyFilterSearch.value.toLowerCase().trim() : "";
+    const category = historyFilterCategory ? historyFilterCategory.value : "ALL";
+    const mode = historyFilterMode ? historyFilterMode.value : "ALL";
+    const sortBy = historySort ? historySort.value : "LATEST";
+
+    // Filter
+    let filtered = loadedHistoryRecords.filter((item: any) => {
+      const matchSearch = item.appName ? item.appName.toLowerCase().includes(query) : false;
+      const matchCategory = category === "ALL" || item.category === category;
+      const matchMode = mode === "ALL" || item.inputMode === mode;
+      return matchSearch && matchCategory && matchMode;
+    });
+
+    // Sort
+    if (sortBy === "LATEST") {
+      filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    } else if (sortBy === "HIGHEST_RATING") {
+      filtered.sort((a, b) => b.rating - a.rating);
+    } else if (sortBy === "HIGHEST_CONFIDENCE") {
+      filtered.sort((a, b) => b.confidence - a.confidence);
+    }
+
+    if (filtered.length === 0) {
+      historyGridContainer.classList.add("hidden");
+      historyEmptyState.classList.remove("hidden");
+      return;
+    }
+
+    historyEmptyState.classList.add("hidden");
+    historyGridContainer.classList.remove("hidden");
+    historyGridContainer.innerHTML = "";
+
+    filtered.forEach((item: any) => {
+      const isChecked = selectedHistoryIds.includes(item.id);
+      
+      const card = document.createElement("div");
+      card.className = "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative hover:shadow-md transition-all flex flex-col justify-between space-y-4";
+      
+      // Format Date
+      const dateStr = item.date ? new Date(item.date).toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      }) : "Unknown Date";
+
+      const modeBadgeClass = item.inputMode === "URL" 
+        ? "bg-sky-50 dark:bg-sky-950/30 text-sky-600 dark:text-sky-400 border border-sky-100 dark:border-sky-900/30"
+        : "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30";
+
+      card.innerHTML = `
+        <div class="space-y-2">
+          <!-- Card Header & Checkbox -->
+          <div class="flex items-start justify-between">
+            <div class="flex flex-wrap gap-1.5 items-center">
+              <span class="px-2 py-0.5 text-[8px] font-bold rounded-md ${modeBadgeClass}">${item.inputMode || "Manual"}</span>
+              <span class="px-2 py-0.5 text-[8px] font-bold rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 capitalize">${(item.category || "").replace(/_/g, " ")}</span>
+            </div>
+            <input 
+              type="checkbox" 
+              data-id="${item.id}"
+              class="history-card-checkbox rounded-sm border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
+              ${isChecked ? "checked" : ""}
+            />
+          </div>
+
+          <!-- App details -->
+          <div>
+            <h4 class="text-sm font-black text-slate-900 dark:text-white truncate" title="${item.appName}">${item.appName}</h4>
+            <span class="text-[9px] font-semibold text-slate-400 block">${dateStr}</span>
+          </div>
+
+          <!-- Forecast Output Row -->
+          <div class="grid grid-cols-2 gap-2 bg-slate-50/50 dark:bg-slate-950/20 rounded-xl p-3 border border-slate-100 dark:border-slate-800/50">
+            <div>
+              <span class="text-[8px] font-bold text-slate-400 block uppercase">Forecast rating</span>
+              <span class="text-base font-black text-slate-800 dark:text-white">${Number(item.rating).toFixed(2)}</span>
+            </div>
+            <div>
+              <span class="text-[8px] font-bold text-slate-400 block uppercase">Confidence</span>
+              <span class="text-base font-black text-indigo-600 dark:text-indigo-400">${item.confidence}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action row -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+          <button 
+            type="button"
+            class="history-view-details-btn text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center space-x-1"
+            data-id="${item.id}"
+          >
+            <span>View Details</span>
+          </button>
+          
+          <button 
+            type="button"
+            class="history-delete-btn text-xs font-bold text-rose-500 hover:text-rose-600 hover:underline flex items-center space-x-1"
+            data-id="${item.id}"
+          >
+            <span>Delete</span>
+          </button>
+        </div>
+      `;
+
+      // Checkbox listener
+      const checkbox = card.querySelector(".history-card-checkbox") as HTMLInputElement;
+      if (checkbox) {
+        checkbox.addEventListener("change", () => {
+          const id = checkbox.getAttribute("data-id")!;
+          if (checkbox.checked) {
+            if (selectedHistoryIds.length >= 2) {
+              checkbox.checked = false;
+              alert("You can select exactly 2 records to execute Side-by-Side Application Audit comparison.");
+              return;
+            }
+            if (!selectedHistoryIds.includes(id)) {
+              selectedHistoryIds.push(id);
+            }
+          } else {
+            selectedHistoryIds = selectedHistoryIds.filter((item) => item !== id);
+          }
+          updateCompareButtonState();
+        });
+      }
+
+      // View details listener
+      const viewDetailsBtn = card.querySelector(".history-view-details-btn");
+      if (viewDetailsBtn) {
+        viewDetailsBtn.addEventListener("click", () => {
+          const id = viewDetailsBtn.getAttribute("data-id")!;
+          showHistoryDetails(id);
+        });
+      }
+
+      // Delete listener
+      const deleteBtn = card.querySelector(".history-delete-btn");
+      if (deleteBtn) {
+        deleteBtn.addEventListener("click", async () => {
+          const id = deleteBtn.getAttribute("data-id")!;
+          if (confirm("Are you sure you want to permanently delete this diagnostic forecast record?")) {
+            try {
+              const res = await fetch(`/api/history/${id}`, { method: "DELETE" });
+              if (res.ok) {
+                loadedHistoryRecords = loadedHistoryRecords.filter((h) => h.id !== id);
+                selectedHistoryIds = selectedHistoryIds.filter((item) => item !== id);
+                updateCompareButtonState();
+                renderHistoryItems();
+              }
+            } catch (err) {
+              console.error(err);
+            }
+          }
+        });
+      }
+
+      historyGridContainer.appendChild(card);
+    });
+  }
+
+  function showHistoryDetails(id: string) {
+    const record = loadedHistoryRecords.find((r) => r.id === id);
+    if (!record || !historyDetailModal) return;
+
+    // Set Header
+    const appNameEl = document.getElementById("detail-app-name");
+    const categoryBadge = document.getElementById("detail-category-badge");
+    const inputModeBadge = document.getElementById("detail-input-mode-badge");
+    const dateEl = document.getElementById("detail-date");
+
+    if (appNameEl) appNameEl.textContent = record.appName;
+    if (categoryBadge) categoryBadge.textContent = (record.category || "").replace(/_/g, " ");
+    
+    if (inputModeBadge) {
+      inputModeBadge.textContent = `${record.inputMode || "Manual"} MODE`;
+      if (record.inputMode === "URL") {
+        inputModeBadge.className = "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-sky-100 dark:bg-sky-950/40 text-sky-600 dark:text-sky-400";
+      } else {
+        inputModeBadge.className = "px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400";
+      }
+    }
+
+    if (dateEl) {
+      dateEl.textContent = record.date ? `EXECUTED ON ${new Date(record.date).toLocaleString()}` : "";
+    }
+
+    // Set Outputs
+    const ratingEl = document.getElementById("detail-rating");
+    const confidenceEl = document.getElementById("detail-confidence");
+    const catAvgEl = document.getElementById("detail-category-avg");
+    const percentileEl = document.getElementById("detail-percentile");
+
+    if (ratingEl) ratingEl.textContent = Number(record.rating).toFixed(2);
+    if (confidenceEl) confidenceEl.textContent = `${record.confidence}%`;
+    if (catAvgEl) catAvgEl.textContent = `${Number(record.categoryAverage || 4.2).toFixed(2)} Rating`;
+    if (percentileEl) percentileEl.textContent = `Top ${Number(record.percentileRank || 50).toFixed(0)}%`;
+
+    // Set Specs
+    const payload = record.payload || {};
+    const specInstalls = document.getElementById("detail-spec-installs");
+    const specReviews = document.getElementById("detail-spec-reviews");
+    const specSize = document.getElementById("detail-spec-size");
+    const specContentRating = document.getElementById("detail-spec-content-rating");
+    const specAds = document.getElementById("detail-spec-ads");
+    const specPrice = document.getElementById("detail-spec-price");
+    const specUpdated = document.getElementById("detail-spec-updated");
+
+    if (specInstalls) specInstalls.textContent = formatInstallsHelper(payload.installs || 10000);
+    if (specReviews) specReviews.textContent = Number(payload.reviews || 0).toLocaleString();
+    if (specSize) specSize.textContent = `${(payload.size || 25).toFixed(1)} MB`;
+    if (specContentRating) specContentRating.textContent = payload.content_rating || "Everyone";
+    if (specAds) specAds.textContent = payload.contains_ads ? "Yes (With Ads)" : "No (Ad-Free)";
+    if (specPrice) specPrice.textContent = Number(payload.price || 0) === 0 ? "Free App" : `$${Number(payload.price).toFixed(2)}`;
+    
+    if (specUpdated) {
+      const days = payload.last_updated_days || 30;
+      let text = `${days} Days ago`;
+      if (days <= 7) text += " (Weekly Update)";
+      else if (days <= 30) text += " (Monthly Update)";
+      else if (days <= 180) text += " (Semi-annual)";
+      else text += " (Stale App)";
+      specUpdated.textContent = text;
+    }
+
+    // Render SHAP Rows inside Detail View
+    const shapContainer = document.getElementById("detail-shap-container");
+    if (shapContainer) {
+      shapContainer.innerHTML = "";
+      const shap = record.shap_values || {};
+      const items = Object.entries(shap).map(([key, val]) => ({ key, val: Number(val) }));
+      items.sort((a, b) => Math.abs(b.val) - Math.abs(a.val)); // Sort by impact
+
+      items.forEach((item) => {
+        const isPositive = item.val >= 0;
+        const absVal = Math.abs(item.val);
+        const widthPercent = Math.min(100, Math.max(8, absVal * 150));
+        const colorClass = isPositive 
+          ? "bg-emerald-500 dark:bg-emerald-600" 
+          : "bg-rose-500 dark:bg-rose-600";
+        const signStr = isPositive ? "+" : "-";
+
+        const row = document.createElement("div");
+        row.className = "space-y-1";
+        row.innerHTML = `
+          <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
+            <span class="capitalize">${item.key.replace(/_/g, " ")}</span>
+            <span class="${isPositive ? 'text-emerald-500' : 'text-rose-500'} font-semibold">${signStr}${absVal.toFixed(3)}</span>
+          </div>
+          <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div class="h-full ${colorClass} rounded-full" style="width: ${widthPercent}%"></div>
+          </div>
+        `;
+        shapContainer.appendChild(row);
+      });
+    }
+
+    // Render Recommendations inside Detail View
+    const recContainer = document.getElementById("detail-recommendations");
+    if (recContainer) {
+      recContainer.innerHTML = "";
+      const shap = record.shap_values || {};
+      const ads = payload.contains_ads;
+      const reviews = payload.reviews || 0;
+      const installs = payload.installs || 0;
+      const days = payload.last_updated_days || 30;
+
+      const tactics: string[] = [];
+      
+      if (days > 90) {
+        tactics.push("<strong>Deploy Storefront Refresh:</strong> Update the binary footprint immediately. Models indicate update latency of >90 days exposes storefront to ranking churn.");
+      } else {
+        tactics.push("<strong>Healthy Update Cadence:</strong> Maintaining binary updates within 90 days prevents storefront depreciation.");
+      }
+
+      if (ads && (shap.contains_ads || 0) < 0) {
+        tactics.push("<strong>Ad-Free Option Model:</strong> Introduce a premium tier removing interstitial storefront ads to recover rating dampening.");
+      }
+
+      if (installs < 100000) {
+        tactics.push("<strong>Acquisition Campaign Boost:</strong> Storefront installs tier is low. Boosting downloads to over 100k can statistically yield category multiplier.");
+      }
+
+      if (shap.reviews && shap.reviews < 0) {
+        tactics.push("<strong>Frictionless Feedback Loop:</strong> Prompt in-app rating reviews during high-delight moments to minimize review degradation.");
+      } else {
+        tactics.push("<strong>Review Density Optimization:</strong> Capitalize on high user satisfaction ratios to solidify current performance.");
+      }
+
+      tactics.forEach((t) => {
+        const div = document.createElement("div");
+        div.className = "text-[10px] text-slate-600 dark:text-slate-400 leading-normal border-l-2 border-indigo-500/50 pl-2.5 py-0.5 bg-slate-100/30 dark:bg-slate-850/30 rounded-r-lg";
+        div.innerHTML = t;
+        recContainer.appendChild(div);
+      });
+    }
+
+    // Show Modal
+    historyDetailModal.classList.remove("hidden");
+  }
+
+  function formatInstallsHelper(num: number): string {
+    if (num >= 1000000000) return `${(num / 1000000000).toFixed(0)}B+`;
+    if (num >= 1000000) return `${(num / 1000000).toFixed(0)}M+`;
+    if (num >= 1000) return `${(num / 1000).toFixed(0)}K+`;
+    return `${num}+`;
+  }
+
+  // Side-by-Side Comparison Logic
+  if (historyCompareBtn) {
+    historyCompareBtn.addEventListener("click", () => {
+      if (selectedHistoryIds.length !== 2 || !historyCompareModal) return;
+
+      const appA = loadedHistoryRecords.find((r) => r.id === selectedHistoryIds[0]);
+      const appB = loadedHistoryRecords.find((r) => r.id === selectedHistoryIds[1]);
+
+      if (!appA || !appB) return;
+
+      // Populate Column A
+      const compNameA = document.getElementById("compare-name-a");
+      const compRatingA = document.getElementById("compare-rating-a");
+      const compConfidenceA = document.getElementById("compare-confidence-a");
+      const compPositionA = document.getElementById("compare-position-a");
+      const compInstallsA = document.getElementById("compare-installs-a");
+      const compReviewsA = document.getElementById("compare-reviews-a");
+      const compSizeA = document.getElementById("compare-size-a");
+      const compUpdatedA = document.getElementById("compare-updated-a");
+      const compAdsA = document.getElementById("compare-ads-a");
+      const compPriceA = document.getElementById("compare-price-a");
+
+      if (compNameA) compNameA.textContent = appA.appName;
+      if (compRatingA) compRatingA.textContent = `${Number(appA.rating).toFixed(2)} / 5.0`;
+      if (compConfidenceA) compConfidenceA.textContent = `${appA.confidence}%`;
+      if (compPositionA) compPositionA.textContent = `Top ${Number(appA.percentileRank || 50).toFixed(0)}%`;
+      if (compInstallsA) compInstallsA.textContent = formatInstallsHelper(appA.payload?.installs || 0);
+      if (compReviewsA) compReviewsA.textContent = Number(appA.payload?.reviews || 0).toLocaleString();
+      if (compSizeA) compSizeA.textContent = `${(appA.payload?.size || 0).toFixed(1)} MB`;
+      if (compUpdatedA) compUpdatedA.textContent = `${appA.payload?.last_updated_days || 0} Days`;
+      if (compAdsA) compAdsA.textContent = appA.payload?.contains_ads ? "Has Ads" : "Ad-Free";
+      if (compPriceA) compPriceA.textContent = Number(appA.payload?.price || 0) === 0 ? "Free" : `$${Number(appA.payload.price).toFixed(2)}`;
+
+      // Populate Column B
+      const compNameB = document.getElementById("compare-name-b");
+      const compRatingB = document.getElementById("compare-rating-b");
+      const compConfidenceB = document.getElementById("compare-confidence-b");
+      const compPositionB = document.getElementById("compare-position-b");
+      const compInstallsB = document.getElementById("compare-installs-b");
+      const compReviewsB = document.getElementById("compare-reviews-b");
+      const compSizeB = document.getElementById("compare-size-b");
+      const compUpdatedB = document.getElementById("compare-updated-b");
+      const compAdsB = document.getElementById("compare-ads-b");
+      const compPriceB = document.getElementById("compare-price-b");
+
+      if (compNameB) compNameB.textContent = appB.appName;
+      if (compRatingB) compRatingB.textContent = `${Number(appB.rating).toFixed(2)} / 5.0`;
+      if (compConfidenceB) compConfidenceB.textContent = `${appB.confidence}%`;
+      if (compPositionB) compPositionB.textContent = `Top ${Number(appB.percentileRank || 50).toFixed(0)}%`;
+      if (compInstallsB) compInstallsB.textContent = formatInstallsHelper(appB.payload?.installs || 0);
+      if (compReviewsB) compReviewsB.textContent = Number(appB.payload?.reviews || 0).toLocaleString();
+      if (compSizeB) compSizeB.textContent = `${(appB.payload?.size || 0).toFixed(1)} MB`;
+      if (compUpdatedB) compUpdatedB.textContent = `${appB.payload?.last_updated_days || 0} Days`;
+      if (compAdsB) compAdsB.textContent = appB.payload?.contains_ads ? "Has Ads" : "Ad-Free";
+      if (compPriceB) compPriceB.textContent = Number(appB.payload?.price || 0) === 0 ? "Free" : `$${Number(appB.payload.price).toFixed(2)}`;
+
+      // Visual Highlighting based on which app is better
+      const isRatingBetterA = Number(appA.rating) >= Number(appB.rating);
+      if (compRatingA && compRatingB) {
+        if (isRatingBetterA) {
+          compRatingA.className = "text-lg font-black text-emerald-600 dark:text-emerald-400";
+          compRatingB.className = "text-lg font-bold text-slate-500 dark:text-slate-400";
+        } else {
+          compRatingA.className = "text-lg font-bold text-slate-500 dark:text-slate-400";
+          compRatingB.className = "text-lg font-black text-emerald-600 dark:text-emerald-400";
+        }
+      }
+
+      const isConfidenceBetterA = Number(appA.confidence) >= Number(appB.confidence);
+      if (compConfidenceA && compConfidenceB) {
+        if (isConfidenceBetterA) {
+          compConfidenceA.className = "font-black text-slate-900 dark:text-white";
+          compConfidenceB.className = "font-medium text-slate-400 dark:text-slate-500";
+        } else {
+          compConfidenceA.className = "font-medium text-slate-400 dark:text-slate-500";
+          compConfidenceB.className = "font-black text-slate-900 dark:text-white";
+        }
+      }
+
+      // Synthesis logic
+      const synthWinner = document.getElementById("compare-synth-winner");
+      const synthAdvantages = document.getElementById("compare-synth-advantages");
+      const synthRisks = document.getElementById("compare-synth-risks");
+
+      const winnerApp = Number(appA.rating) >= Number(appB.rating) ? appA : appB;
+      const loserApp = Number(appA.rating) >= Number(appB.rating) ? appB : appA;
+
+      if (synthWinner) {
+        synthWinner.textContent = `${winnerApp.appName} (${Number(winnerApp.rating).toFixed(2)} / 5.0)`;
+      }
+
+      if (synthAdvantages) {
+        synthAdvantages.innerHTML = "";
+        const advantages: string[] = [];
+
+        if ((winnerApp.payload?.installs || 0) > (loserApp.payload?.installs || 0)) {
+          advantages.push(`Larger distribution scale (${formatInstallsHelper(winnerApp.payload?.installs || 0)}) limits rating volatility.`);
+        }
+        if ((winnerApp.payload?.last_updated_days || 30) < (loserApp.payload?.last_updated_days || 30)) {
+          advantages.push(`Faster update cadence (${winnerApp.payload?.last_updated_days || 0} days) shows higher publisher commitment.`);
+        }
+        if (!winnerApp.payload?.contains_ads && loserApp.payload?.contains_ads) {
+          advantages.push(`Ad-free user experience prevents rating drag.`);
+        }
+        if ((winnerApp.payload?.reviews || 0) > (loserApp.payload?.reviews || 0)) {
+          advantages.push(`Stronger review density builds algorithmic feedback loop confidence.`);
+        }
+
+        if (advantages.length === 0) {
+          advantages.push("Marginal optimization advantages across basic parameters.");
+        }
+
+        advantages.forEach((adv) => {
+          const li = document.createElement("li");
+          li.className = "mb-1 text-[10px] text-slate-600 dark:text-slate-400 list-none leading-relaxed pl-3 border-l-2 border-emerald-500";
+          li.textContent = adv;
+          synthAdvantages.appendChild(li);
+        });
+      }
+
+      if (synthRisks) {
+        synthRisks.innerHTML = "";
+        const risks: string[] = [];
+
+        if (loserApp.payload?.contains_ads) {
+          risks.push(`Interstitial ad fatigue model detected on ${loserApp.appName}.`);
+        }
+        if ((loserApp.payload?.last_updated_days || 0) > 90) {
+          risks.push(`Update latency on ${loserApp.appName} exceeded threshold of 90 days.`);
+        }
+        if ((loserApp.payload?.installs || 0) < 10000) {
+          risks.push(`Low distribution volume (${formatInstallsHelper(loserApp.payload?.installs || 0)}) poses niche ranking risks.`);
+        }
+
+        if (risks.length === 0) {
+          risks.push("No major critical risks identified on current models.");
+        }
+
+        risks.forEach((rk) => {
+          const li = document.createElement("li");
+          li.className = "mb-1 text-[10px] text-slate-600 dark:text-slate-400 list-none leading-relaxed pl-3 border-l-2 border-rose-500";
+          li.textContent = rk;
+          synthRisks.appendChild(li);
+        });
+      }
+
+      historyCompareModal.classList.remove("hidden");
+    });
+  }
+
+  // Bind close buttons
+  historyDetailClose?.addEventListener("click", () => {
+    historyDetailModal?.classList.add("hidden");
+  });
+  historyCompareClose?.addEventListener("click", () => {
+    historyCompareModal?.classList.add("hidden");
+  });
+
+  // Bind refresh click
+  if (historyRefreshBtn) {
+    historyRefreshBtn.addEventListener("click", updateHistoryView);
+  }
+
+  // Bind filter controls
+  if (historyFilterSearch) {
+    historyFilterSearch.addEventListener("input", renderHistoryItems);
+  }
+  if (historyFilterCategory) {
+    historyFilterCategory.addEventListener("change", renderHistoryItems);
+  }
+  if (historyFilterMode) {
+    historyFilterMode.addEventListener("change", renderHistoryItems);
+  }
+  if (historySort) {
+    historySort.addEventListener("change", renderHistoryItems);
+  }
+  if (historyClearFilters) {
+    historyClearFilters.addEventListener("click", () => {
+      if (historyFilterSearch) historyFilterSearch.value = "";
+      if (historyFilterCategory) historyFilterCategory.value = "ALL";
+      if (historyFilterMode) historyFilterMode.value = "ALL";
+      if (historySort) historySort.value = "LATEST";
+      renderHistoryItems();
+    });
+  }
+
   function switchPage(activePageId: string) {
-    if (activePageId === "page-competitor") {
-      updateCompetitorView();
-    }
-    if (activePageId === "page-trend") {
-      updateTrendView();
-    }
-    if (activePageId === "page-advisor") {
-      updateAdvisorView();
-    }
-    if (activePageId === "page-eda-insights") {
-      updateEdaInsightsView();
-    }
-    if (activePageId === "page-eda-dashboard") {
-      updateEdaDashboardView();
-    }
     pages.forEach((pageId) => {
       const pageEl = document.getElementById(pageId);
       if (pageEl) {
@@ -2060,6 +2655,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
     });
+
+    if (activePageId === "page-competitor") {
+      updateCompetitorView();
+    }
+    if (activePageId === "page-trend") {
+      updateTrendView();
+    }
+    if (activePageId === "page-advisor") {
+      updateAdvisorView();
+    }
+    if (activePageId === "page-eda-insights") {
+      updateEdaInsightsView();
+    }
+    if (activePageId === "page-eda-dashboard") {
+      updateEdaDashboardView();
+    }
+    if (activePageId === "page-history") {
+      updateHistoryView();
+    }
   }
 
   // Register Click handlers

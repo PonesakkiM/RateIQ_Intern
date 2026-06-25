@@ -13,6 +13,7 @@ st.set_page_config(
     layout="centered"
 )
 st.markdown(f'<div>{LOGO_SVG}</div>', unsafe_allow_html=True)
+
 # Metadata configuration options
 CATEGORIES = [
     "ART_AND_DESIGN", "AUTO_AND_VEHICLES", "BEAUTY", "BOOKS_AND_REFERENCE", "BUSINESS", 
@@ -103,7 +104,7 @@ def fetch_data(url):
                     inferred_name = pkg_parts[1].capitalize()
                     if inferred_name.lower() in ["android", "google"] and len(pkg_parts) > 2:
                         inferred_name = pkg_parts[2].capitalize()
-
+ 
         return {
             "app_name": inferred_name,
             "category": "GAME" if "game" in url_lower else "TOOLS",
@@ -206,7 +207,8 @@ def get_shap_analysis(payload, final_rating=None):
 
 # Helper: Call API to predict rating
 def call_api(payload):
-    api_url = "http://localhost:8000/predict"
+    backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+    api_url = f"{backend_url}/predict"
     try:
         response = requests.post(api_url, json=payload, timeout=3)
         if response.status_code == 200:
