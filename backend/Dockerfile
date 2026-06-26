@@ -26,8 +26,8 @@ COPY . /app/backend/
 # Create models folder inside backend
 RUN mkdir -p /app/backend/models
 
-# Expose port 8000
+# Expose port
 EXPOSE 8000
 
-# Run uvicorn server from /app working directory
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run uvicorn server from /app working directory, dynamically using the PORT environment variable if set
+CMD ["sh", "-c", "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

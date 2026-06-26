@@ -107,6 +107,13 @@ document.addEventListener("DOMContentLoaded", () => {
     size?: number;
   } | null = null;
 
+  // ----------------- SaaS CUSTOM ENGINE EXTENSIONS -----------------
+  let sessionPredictionsCount = 0;
+
+  // ----------------- FRONTEND AUTH SYSTEM (UI-ONLY) -----------------
+  let isLoggedIn = localStorage.getItem("rateiq_logged_in") === "true";
+  let loggedInUserEmail = localStorage.getItem("rateiq_user_email") || "ponesakki0308@gmail.com";
+
   // ----------------- THEME SYSTEM -----------------
   function initializeTheme() {
     const savedTheme = localStorage.getItem("rateiq_theme") || "light";
@@ -596,6 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const inputMode = (currentInputMode === "url") ? "URL" : "Manual";
 
       const historyRecord = {
+        userEmail: isLoggedIn ? loggedInUserEmail : "ponesakki0308@gmail.com",
         appName: payload.app_name,
         category: payload.category,
         rating: rating,
@@ -640,17 +648,52 @@ document.addEventListener("DOMContentLoaded", () => {
     if (competitorCard) competitorCard.classList.add("hidden");
     loadingState.classList.remove("hidden");
 
-    // Gather payloads
-    const appName = appNameInput.value.trim() || "Extracted App Store App";
+    // Gather payloads with basic validation
+    const appName = appNameInput.value.trim();
+    if (!appName) {
+      showToast("Please enter an application name.", "error");
+      loadingState.classList.add("hidden");
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    const size = parseFloat(sizeInput.value);
+    if (isNaN(size) || size <= 0) {
+      showToast("Please enter a valid positive size (MB).", "error");
+      loadingState.classList.add("hidden");
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    const price = parseFloat(priceInput.value);
+    if (isNaN(price) || price < 0) {
+      showToast("Please enter a valid non-negative price.", "error");
+      loadingState.classList.add("hidden");
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    const reviews = parseInt(reviewsInput.value);
+    if (isNaN(reviews) || reviews < 0) {
+      showToast("Please enter a valid non-negative reviews count.", "error");
+      loadingState.classList.add("hidden");
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    const lastUpdatedDays = parseInt(lastUpdatedInput.value);
+    if (isNaN(lastUpdatedDays) || lastUpdatedDays <= 0) {
+      showToast("Please enter a valid positive number of days since last update.", "error");
+      loadingState.classList.add("hidden");
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
     const category = categorySelect.value;
     const installs = parseInt(installsSelect.value) || 10000;
-    const size = parseFloat(sizeInput.value) || 24.5;
-    const price = parseFloat(priceInput.value) || 0.0;
     const appType = appTypeSelect.value;
     const ads = adsHiddenInput.value;
     const contentRating = contentRatingSelect.value;
-    const reviews = parseInt(reviewsInput.value) || 250;
-    const lastUpdatedDays = parseInt(lastUpdatedInput.value) || 30;
 
     const payload = {
       app_name: appName,
@@ -698,6 +741,44 @@ document.addEventListener("DOMContentLoaded", () => {
       if (sourceMetric) sourceMetric.textContent = `Source: ${data.source || "Predictive Model Fallback"}`;
       if (confidenceMetric) confidenceMetric.textContent = `${data.confidence || 92}%`;
 
+      // Determine Primary Strength and Risk Profile based on SHAP impacts
+      let primaryStrength = "Optimized MB Size";
+      let riskProfile = "High Reviews Ratio";
+      const shaps = data.shap_values || {};
+      let maxShapVal = -999;
+      let minShapVal = 999;
+      
+      const formatKeyName = (k: string) => {
+        const mapping: Record<string, string> = {
+          "installs": "User Install Volume",
+          "reviews": "Review Density",
+          "size": "App Footprint (MB)",
+          "price": "Pricing Model",
+          "contains_ads": "In-App Ad Density",
+          "last_updated_days": "Update Frequency",
+          "category": "Market Segment Context",
+          "app_type": "Subscription Tier"
+        };
+        return mapping[k] || k.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      };
+
+      Object.entries(shaps).forEach(([key, val]) => {
+        const numVal = Number(val);
+        if (numVal > maxShapVal && numVal > 0) {
+          maxShapVal = numVal;
+          primaryStrength = formatKeyName(key);
+        }
+        if (numVal < minShapVal && numVal < 0) {
+          minShapVal = numVal;
+          riskProfile = formatKeyName(key);
+        }
+      });
+
+      const strengthMetric = document.getElementById("strength-metric");
+      const riskMetric = document.getElementById("risk-metric");
+      if (strengthMetric) strengthMetric.textContent = primaryStrength;
+      if (riskMetric) riskMetric.textContent = riskProfile;
+
       // Draw SHAP and market compare
       renderShapBars(data.shap_values || {});
       renderMarketTrend(category, rating);
@@ -707,11 +788,18 @@ document.addEventListener("DOMContentLoaded", () => {
       // Save prediction report automatically in history
       await savePredictionToHistory(payload, rating, data.confidence || 92, data.shap_values || {});
 
+      // Increment active predictions session counter
+      sessionPredictionsCount++;
+      updateHomeDashboard();
+
+      // Show professional smart toast alerts
+      showToast(`Prediction generated successfully for ${appName}.`, "success");
+
       // Set visibility
       loadingState.classList.add("hidden");
       resultContent.classList.remove("hidden");
     } catch (err) {
-      alert("Error occurred contacting rating API engine. Confirm configurations.");
+      showToast("Error occurred contacting rating API engine. Please verify configurations.", "error");
       loadingState.classList.add("hidden");
       emptyState.classList.remove("hidden");
     }
@@ -754,11 +842,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const price = parseFloat(priceInput.value) || 0.0;
     const appType = appTypeSelect.value;
 
-    // What-If Overlays
-    const wiReviews = parseInt(wiReviewsInput.value) || 250;
+    // What-If Overlays with basic validation
+    const wiReviews = parseInt(wiReviewsInput.value);
+    if (isNaN(wiReviews) || wiReviews < 0) {
+      showToast("Please enter a valid non-negative What-If Reviews value.", "error");
+      return;
+    }
+
+    const wiSize = parseFloat(wiSizeInput.value);
+    if (isNaN(wiSize) || wiSize <= 0) {
+      showToast("Please enter a valid positive What-If Size (MB) value.", "error");
+      return;
+    }
+
+    const wiLastUpdated = parseInt(wiLastUpdatedInput.value);
+    if (isNaN(wiLastUpdated) || wiLastUpdated <= 0) {
+      showToast("Please enter a valid positive What-If Update Recency value.", "error");
+      return;
+    }
+
     const wiInstalls = parseInt(wiInstallsSelect.value) || 10000;
-    const wiSize = parseFloat(wiSizeInput.value) || 24.5;
-    const wiLastUpdated = parseInt(wiLastUpdatedInput.value) || 30;
     const wiAds = wiAdsHiddenInput.value;
 
     simulateBtn.disabled = true;
@@ -847,7 +950,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ----------------- SIDEBAR PAGE NAVIGATION -----------------
-  const pages = ["page-home", "page-prediction", "page-competitor", "page-trend", "page-advisor", "page-eda-insights", "page-eda-dashboard", "page-history", "page-about"];
+  const pages = ["page-home", "page-prediction", "page-competitor", "page-trend", "page-advisor", "page-eda-insights", "page-eda-dashboard", "page-history", "page-about", "page-signup", "page-profile", "page-settings"];
   const navButtons: Record<string, HTMLElement | null> = {
     "page-home": document.getElementById("nav-home"),
     "page-prediction": document.getElementById("nav-prediction"),
@@ -857,7 +960,10 @@ document.addEventListener("DOMContentLoaded", () => {
     "page-eda-insights": document.getElementById("nav-eda-insights"),
     "page-eda-dashboard": document.getElementById("nav-eda-dashboard"),
     "page-history": document.getElementById("nav-history"),
-    "page-about": document.getElementById("nav-about")
+    "page-about": document.getElementById("nav-about"),
+    "page-signup": null,
+    "page-profile": null,
+    "page-settings": null
   };
 
   function updateCompetitorView() {
@@ -2108,6 +2214,17 @@ document.addEventListener("DOMContentLoaded", () => {
   async function updateHistoryView() {
     if (!historyLoadingState || !historyEmptyState || !historyGridContainer) return;
     
+    const historyLoggedOutState = document.getElementById("history-logged-out-state");
+    if (!isLoggedIn) {
+      if (historyLoggedOutState) historyLoggedOutState.classList.remove("hidden");
+      historyLoadingState.classList.add("hidden");
+      historyEmptyState.classList.add("hidden");
+      historyGridContainer.classList.add("hidden");
+      return;
+    } else {
+      if (historyLoggedOutState) historyLoggedOutState.classList.add("hidden");
+    }
+
     historyLoadingState.classList.remove("hidden");
     historyEmptyState.classList.add("hidden");
     historyGridContainer.classList.add("hidden");
@@ -2115,7 +2232,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCompareButtonState();
 
     try {
-      const response = await fetch("/api/history");
+      const response = await fetch(`/api/history?email=${encodeURIComponent(isLoggedIn ? loggedInUserEmail : "ponesakki0308@gmail.com")}`);
       if (!response.ok) throw new Error("Failed to load history list");
       loadedHistoryRecords = await response.json();
       renderHistoryItems();
@@ -2348,7 +2465,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (specReviews) specReviews.textContent = Number(payload.reviews || 0).toLocaleString();
     if (specSize) specSize.textContent = `${(payload.size || 25).toFixed(1)} MB`;
     if (specContentRating) specContentRating.textContent = payload.content_rating || "Everyone";
-    if (specAds) specAds.textContent = payload.contains_ads ? "Yes (With Ads)" : "No (Ad-Free)";
+    if (specAds) specAds.textContent = payload.contains_ads === "Yes" ? "Yes (With Ads)" : "No (Ad-Free)";
     if (specPrice) specPrice.textContent = Number(payload.price || 0) === 0 ? "Free App" : `$${Number(payload.price).toFixed(2)}`;
     
     if (specUpdated) {
@@ -2411,7 +2528,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tactics.push("<strong>Healthy Update Cadence:</strong> Maintaining binary updates within 90 days prevents storefront depreciation.");
       }
 
-      if (ads && (shap.contains_ads || 0) < 0) {
+      if (ads === "Yes" && (shap["Ad Presence"] || 0) < 0) {
         tactics.push("<strong>Ad-Free Option Model:</strong> Introduce a premium tier removing interstitial storefront ads to recover rating dampening.");
       }
 
@@ -2474,7 +2591,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (compReviewsA) compReviewsA.textContent = Number(appA.payload?.reviews || 0).toLocaleString();
       if (compSizeA) compSizeA.textContent = `${(appA.payload?.size || 0).toFixed(1)} MB`;
       if (compUpdatedA) compUpdatedA.textContent = `${appA.payload?.last_updated_days || 0} Days`;
-      if (compAdsA) compAdsA.textContent = appA.payload?.contains_ads ? "Has Ads" : "Ad-Free";
+      if (compAdsA) compAdsA.textContent = appA.payload?.contains_ads === "Yes" ? "Has Ads" : "Ad-Free";
       if (compPriceA) compPriceA.textContent = Number(appA.payload?.price || 0) === 0 ? "Free" : `$${Number(appA.payload.price).toFixed(2)}`;
 
       // Populate Column B
@@ -2497,7 +2614,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (compReviewsB) compReviewsB.textContent = Number(appB.payload?.reviews || 0).toLocaleString();
       if (compSizeB) compSizeB.textContent = `${(appB.payload?.size || 0).toFixed(1)} MB`;
       if (compUpdatedB) compUpdatedB.textContent = `${appB.payload?.last_updated_days || 0} Days`;
-      if (compAdsB) compAdsB.textContent = appB.payload?.contains_ads ? "Has Ads" : "Ad-Free";
+      if (compAdsB) compAdsB.textContent = appB.payload?.contains_ads === "Yes" ? "Has Ads" : "Ad-Free";
       if (compPriceB) compPriceB.textContent = Number(appB.payload?.price || 0) === 0 ? "Free" : `$${Number(appB.payload.price).toFixed(2)}`;
 
       // Visual Highlighting based on which app is better
@@ -2545,7 +2662,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if ((winnerApp.payload?.last_updated_days || 30) < (loserApp.payload?.last_updated_days || 30)) {
           advantages.push(`Faster update cadence (${winnerApp.payload?.last_updated_days || 0} days) shows higher publisher commitment.`);
         }
-        if (!winnerApp.payload?.contains_ads && loserApp.payload?.contains_ads) {
+        if (winnerApp.payload?.contains_ads !== "Yes" && loserApp.payload?.contains_ads === "Yes") {
           advantages.push(`Ad-free user experience prevents rating drag.`);
         }
         if ((winnerApp.payload?.reviews || 0) > (loserApp.payload?.reviews || 0)) {
@@ -2568,7 +2685,7 @@ document.addEventListener("DOMContentLoaded", () => {
         synthRisks.innerHTML = "";
         const risks: string[] = [];
 
-        if (loserApp.payload?.contains_ads) {
+        if (loserApp.payload?.contains_ads === "Yes") {
           risks.push(`Interstitial ad fatigue model detected on ${loserApp.appName}.`);
         }
         if ((loserApp.payload?.last_updated_days || 0) > 90) {
@@ -2631,6 +2748,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function switchPage(activePageId: string) {
+    // Dynamic breadcrumb text mapping
+    const breadcrumbCurrentTab = document.getElementById("breadcrumb-current-tab");
+    if (breadcrumbCurrentTab) {
+      const pageNamesMap: Record<string, string> = {
+        "page-home": "Home Console",
+        "page-prediction": "Prediction Engine",
+        "page-competitor": "Competitor Analysis",
+        "page-trend": "Trend Analysis",
+        "page-advisor": "AI Advisor Solutions",
+        "page-eda-insights": "Market EDA Insights",
+        "page-eda-dashboard": "EDA Empirical Dashboard",
+        "page-history": "Diagnostic History",
+        "page-about": "System Information",
+        "page-signup": "Create Account",
+        "page-profile": "Account Profile",
+        "page-settings": "System Settings"
+      };
+      breadcrumbCurrentTab.textContent = pageNamesMap[activePageId] || "Dashboard";
+    }
+
     pages.forEach((pageId) => {
       const pageEl = document.getElementById(pageId);
       if (pageEl) {
@@ -2659,6 +2796,38 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activePageId === "page-competitor") {
       updateCompetitorView();
     }
+
+    if (activePageId === "page-profile") {
+      const profileEmailText = document.getElementById("profile-email-text");
+      if (profileEmailText) {
+        profileEmailText.textContent = loggedInUserEmail;
+      }
+      const profileNameTitle = document.getElementById("profile-name-title");
+      const profileFullNameInput = document.getElementById("profile-full-name") as HTMLInputElement | null;
+      const savedName = localStorage.getItem("rateiq_profile_name") || loggedInUserEmail.split("@")[0];
+      const displayName = savedName.charAt(0).toUpperCase() + savedName.slice(1);
+      if (profileNameTitle) {
+        profileNameTitle.textContent = displayName;
+      }
+      if (profileFullNameInput) {
+        profileFullNameInput.value = savedName;
+      }
+      
+      const profileCompanyText = document.getElementById("profile-company-text");
+      const profileCompanyInput = document.getElementById("profile-company") as HTMLInputElement | null;
+      const savedCompany = localStorage.getItem("rateiq_profile_company") || "RateIQ Enterprise";
+      if (profileCompanyText) {
+        profileCompanyText.textContent = savedCompany;
+      }
+      if (profileCompanyInput) {
+        profileCompanyInput.value = savedCompany;
+      }
+      
+      const profileAvatarBig = document.getElementById("profile-avatar-big");
+      if (profileAvatarBig) {
+        profileAvatarBig.textContent = displayName.slice(0, 2).toUpperCase();
+      }
+    }
     if (activePageId === "page-trend") {
       updateTrendView();
     }
@@ -2674,6 +2843,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (activePageId === "page-history") {
       updateHistoryView();
     }
+
+    if (window.innerWidth < 768) {
+      const sidebarEl = document.getElementById("sidebar");
+      if (sidebarEl) {
+        sidebarEl.classList.add("hidden");
+        sidebarEl.classList.remove("flex");
+      }
+    }
   }
 
   // Register Click handlers
@@ -2683,6 +2860,764 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => switchPage(pageId));
     }
   });
+
+  // ----------------- AUTHENTICATION & SIDEBAR WORKFLOWS -----------------
+  const loginModal = document.getElementById("login-modal");
+  const loginModalClose = document.getElementById("login-modal-close");
+  const loginForm = document.getElementById("login-form") as HTMLFormElement;
+  const historyLoginTrigger = document.getElementById("history-login-trigger");
+  const sidebarToggle = document.getElementById("sidebar-toggle");
+  const sidebarEl = document.getElementById("sidebar");
+
+  function updateAuthUI() {
+    const loggedOutEl = document.getElementById("auth-logged-out");
+    const loggedInEl = document.getElementById("auth-logged-in");
+    
+    if (isLoggedIn) {
+      if (loggedOutEl) loggedOutEl.classList.add("hidden");
+      if (loggedInEl) loggedInEl.classList.remove("hidden");
+      
+      const headerEmailEl = document.getElementById("header-email");
+      const dropdownEmailEl = document.getElementById("dropdown-user-email");
+      const headerUsernameEl = document.getElementById("header-username");
+      const headerAvatarEl = document.getElementById("header-avatar");
+      
+      if (headerEmailEl) headerEmailEl.textContent = loggedInUserEmail;
+      if (dropdownEmailEl) dropdownEmailEl.textContent = loggedInUserEmail;
+      
+      const savedName = localStorage.getItem("rateiq_profile_name");
+      const username = savedName || loggedInUserEmail.split("@")[0];
+      const displayName = username.charAt(0).toUpperCase() + username.slice(1);
+      if (headerUsernameEl) headerUsernameEl.textContent = displayName;
+      
+      const initials = username.slice(0, 2).toUpperCase();
+      if (headerAvatarEl) headerAvatarEl.textContent = initials || "U";
+    } else {
+      if (loggedOutEl) loggedOutEl.classList.remove("hidden");
+      if (loggedInEl) loggedInEl.classList.add("hidden");
+    }
+    
+    // Refresh dashboard values to display correct scoping
+    updateHomeDashboard();
+  }
+
+  // Show login modal with dynamic field clearing and autocomplete control
+  const openLoginModal = () => {
+    const loginEmailInputOnLoad = document.getElementById("login-email") as HTMLInputElement | null;
+    const loginPasswordInputOnLoad = document.getElementById("login-password") as HTMLInputElement | null;
+    if (loginEmailInputOnLoad) {
+      loginEmailInputOnLoad.value = "";
+      loginEmailInputOnLoad.setAttribute("autocomplete", "off");
+    }
+    if (loginPasswordInputOnLoad) {
+      loginPasswordInputOnLoad.value = "";
+      loginPasswordInputOnLoad.setAttribute("autocomplete", "new-password");
+    }
+    if (loginModal) loginModal.classList.remove("hidden");
+  };
+
+  // Clear login fields and set autocomplete attributes immediately on file load
+  const loginEmailInputInitial = document.getElementById("login-email") as HTMLInputElement | null;
+  const loginPasswordInputInitial = document.getElementById("login-password") as HTMLInputElement | null;
+  if (loginEmailInputInitial) {
+    loginEmailInputInitial.value = "";
+    loginEmailInputInitial.setAttribute("autocomplete", "off");
+  }
+  if (loginPasswordInputInitial) {
+    loginPasswordInputInitial.value = "";
+    loginPasswordInputInitial.setAttribute("autocomplete", "new-password");
+  }
+
+  // Delegate Sign In Trigger Click handlers (robust delegation)
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (target && (target.id === "header-login-btn" || target.closest("#header-login-btn") || target.id === "history-login-trigger" || target.closest("#history-login-trigger") || target.id === "home-activity-login-btn" || target.closest("#home-activity-login-btn"))) {
+      openLoginModal();
+    }
+  });
+
+  // Close login modal
+  if (loginModalClose) {
+    loginModalClose.addEventListener("click", () => {
+      if (loginModal) loginModal.classList.add("hidden");
+    });
+  }
+
+  // Link to trigger signup from login modal
+  const loginCreateAccountLink = document.getElementById("login-create-account-link");
+  if (loginCreateAccountLink) {
+    loginCreateAccountLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (loginModal) loginModal.classList.add("hidden");
+      switchPage("page-signup");
+    });
+  }
+
+  // Link to trigger login from signup page
+  const signupLoginLink = document.getElementById("signup-login-link");
+  if (signupLoginLink) {
+    signupLoginLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      switchPage("page-home");
+      openLoginModal();
+    });
+  }
+
+  // Handle Signup form submit
+  const signupForm = document.getElementById("signup-form") as HTMLFormElement | null;
+  if (signupForm) {
+    signupForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const signupEmailInput = document.getElementById("signup-email") as HTMLInputElement | null;
+      const signupNameInput = document.getElementById("signup-name") as HTMLInputElement | null;
+      
+      if (signupEmailInput) {
+        loggedInUserEmail = signupEmailInput.value.trim() || "ponesakki0308@gmail.com";
+        localStorage.setItem("rateiq_user_email", loggedInUserEmail);
+      }
+      if (signupNameInput) {
+        localStorage.setItem("rateiq_profile_name", signupNameInput.value.trim());
+      }
+      
+      isLoggedIn = true;
+      localStorage.setItem("rateiq_logged_in", "true");
+      
+      showToast("Account created successfully!", "success");
+      updateAuthUI();
+      switchPage("page-home");
+    });
+  }
+
+  // Handle Login form submit
+  if (loginForm) {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      isLoggedIn = true;
+      localStorage.setItem("rateiq_logged_in", "true");
+      
+      const loginEmailInput = document.getElementById("login-email") as HTMLInputElement;
+      if (loginEmailInput) {
+        loggedInUserEmail = loginEmailInput.value.trim() || "ponesakki0308@gmail.com";
+        localStorage.setItem("rateiq_user_email", loggedInUserEmail);
+      }
+      
+      if (loginModal) loginModal.classList.add("hidden");
+      updateAuthUI();
+      // If we are currently on the history page, update the view
+      updateHistoryView();
+      showToast(`Successfully logged in as ${loggedInUserEmail}.`, "success");
+    });
+  }
+
+  // Unified Logout Flow
+  function handleLogout() {
+    isLoggedIn = false;
+    
+    // Clear session, localStorage, and cache
+    localStorage.clear();
+    sessionStorage.clear();
+    if (window.caches) {
+      window.caches.keys().then((keys) => {
+        keys.forEach((key) => window.caches.delete(key));
+      });
+    }
+
+    loggedInUserEmail = "ponesakki0308@gmail.com"; // Reset to default
+    
+    // Empty login fields
+    const loginEmailInput = document.getElementById("login-email") as HTMLInputElement | null;
+    const loginPasswordInput = document.getElementById("login-password") as HTMLInputElement | null;
+    if (loginEmailInput) loginEmailInput.value = "";
+    if (loginPasswordInput) loginPasswordInput.value = "";
+    
+    // Close the dropdown
+    const dropdown = document.getElementById("three-dot-dropdown");
+    if (dropdown) dropdown.classList.add("hidden");
+    
+    updateAuthUI();
+    // If we are currently on the history page, update the view (which will redirect or hide content)
+    updateHistoryView();
+    
+    // Redirect/switch page to Home Console
+    switchPage("page-home");
+    showToast("Logged out successfully.", "success");
+  }
+
+  // Password Show/Hide Toggle Setup
+  const loginPassword = document.getElementById("login-password") as HTMLInputElement | null;
+  const passwordToggle = document.getElementById("login-password-toggle");
+  const eyeOpenIcon = document.getElementById("eye-open-icon");
+  const eyeClosedIcon = document.getElementById("eye-closed-icon");
+
+  if (passwordToggle && loginPassword && eyeOpenIcon && eyeClosedIcon) {
+    passwordToggle.addEventListener("click", () => {
+      if (loginPassword.type === "password") {
+        loginPassword.type = "text";
+        eyeOpenIcon.classList.add("hidden");
+        eyeClosedIcon.classList.remove("hidden");
+      } else {
+        loginPassword.type = "password";
+        eyeOpenIcon.classList.remove("hidden");
+        eyeClosedIcon.classList.add("hidden");
+      }
+    });
+  }
+
+  // Handle Mobile Sidebar toggle
+  if (sidebarToggle && sidebarEl) {
+    sidebarToggle.addEventListener("click", () => {
+      sidebarEl.classList.toggle("hidden");
+      sidebarEl.classList.toggle("flex");
+    });
+  }
+
+  // System 3-Dot (⋮) Menu Interaction Logic
+  const threeDotBtn = document.getElementById("three-dot-menu-btn");
+  const threeDotDropdown = document.getElementById("three-dot-dropdown");
+
+  if (threeDotBtn && threeDotDropdown) {
+    threeDotBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      threeDotDropdown.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!threeDotBtn.contains(e.target as Node) && !threeDotDropdown.contains(e.target as Node)) {
+        threeDotDropdown.classList.add("hidden");
+      }
+    });
+  }
+
+  // System Dropdown Action Hooks
+  const menuOptProfile = document.getElementById("menu-opt-profile");
+  if (menuOptProfile) {
+    menuOptProfile.addEventListener("click", () => {
+      threeDotDropdown?.classList.add("hidden");
+      switchPage("page-profile");
+    });
+  }
+
+  const menuOptSettings = document.getElementById("menu-opt-settings");
+  if (menuOptSettings) {
+    menuOptSettings.addEventListener("click", () => {
+      threeDotDropdown?.classList.add("hidden");
+      switchPage("page-settings");
+    });
+  }
+
+  // Profile Edit Form Handler
+  const profileEditForm = document.getElementById("profile-edit-form") as HTMLFormElement | null;
+  if (profileEditForm) {
+    profileEditForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const profileFullNameInput = document.getElementById("profile-full-name") as HTMLInputElement | null;
+      const profileCompanyInput = document.getElementById("profile-company") as HTMLInputElement | null;
+      if (profileFullNameInput) {
+        localStorage.setItem("rateiq_profile_name", profileFullNameInput.value.trim());
+      }
+      if (profileCompanyInput) {
+        localStorage.setItem("rateiq_profile_company", profileCompanyInput.value.trim());
+      }
+      updateAuthUI(); // Updates header avatar/name dynamically!
+      
+      // Update profile page view titles as well
+      const profileNameTitle = document.getElementById("profile-name-title");
+      if (profileNameTitle && profileFullNameInput) {
+        const displayName = profileFullNameInput.value.trim();
+        profileNameTitle.textContent = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+        const profileAvatarBig = document.getElementById("profile-avatar-big");
+        if (profileAvatarBig) {
+          profileAvatarBig.textContent = displayName.slice(0, 2).toUpperCase();
+        }
+      }
+      const profileCompanyText = document.getElementById("profile-company-text");
+      if (profileCompanyText && profileCompanyInput) {
+        profileCompanyText.textContent = profileCompanyInput.value.trim();
+      }
+
+      showToast("Profile updated successfully!", "success");
+    });
+  }
+
+  // Settings Interaction Handlers
+  const settingsThemeToggle = document.getElementById("settings-theme-toggle");
+  if (settingsThemeToggle) {
+    settingsThemeToggle.addEventListener("click", () => {
+      // Trigger the main theme toggle btn click!
+      if (themeToggleBtn) {
+        themeToggleBtn.click();
+        showToast("Theme settings updated.", "success");
+      }
+    });
+  }
+
+  const settingsResetStorage = document.getElementById("settings-reset-storage");
+  if (settingsResetStorage) {
+    settingsResetStorage.addEventListener("click", () => {
+      if (confirm("Are you sure you want to reset all application storage? This cannot be undone.")) {
+        handleLogout();
+        showToast("All local application data has been reset.", "success");
+      }
+    });
+  }
+
+  const menuOptLogout = document.getElementById("menu-opt-logout");
+  if (menuOptLogout) {
+    menuOptLogout.addEventListener("click", () => {
+      handleLogout();
+    });
+  }
+
+  // Initial Auth UI State
+  updateAuthUI();
+
+  // ----------------- SaaS CUSTOM ENGINE EXTENSIONS -----------------
+
+  // Smart Alert Toast System
+  function showToast(message: string, type: "success" | "error" | "info" = "success") {
+    // Check if toast container exists
+    let container = document.getElementById("toast-container");
+    if (!container) {
+      container = document.createElement("div");
+      container.id = "toast-container";
+      container.className = "fixed bottom-5 right-5 space-y-2 z-50 pointer-events-none max-w-sm w-full px-4";
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `p-3.5 rounded-xl border shadow-lg flex items-start space-x-3 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto text-xs bg-white dark:bg-slate-900 ${
+      type === "success" 
+        ? "border-emerald-200 dark:border-emerald-800/60 text-slate-800 dark:text-slate-200" 
+        : type === "error"
+        ? "border-rose-200 dark:border-rose-800/60 text-slate-800 dark:text-slate-200"
+        : "border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200"
+    }`;
+
+    // Dynamic icon markup
+    const successIcon = `<div class="h-4 w-4 text-emerald-500 shrink-0 mt-0.5"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0" /></svg></div>`;
+    const errorIcon = `<div class="h-4 w-4 text-rose-500 shrink-0 mt-0.5"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0" /></svg></div>`;
+    const infoIcon = `<div class="h-4 w-4 text-indigo-500 shrink-0 mt-0.5"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0" /></svg></div>`;
+
+    toast.innerHTML = `
+      ${type === "success" ? successIcon : type === "error" ? errorIcon : infoIcon}
+      <div class="flex-1">
+        <p class="font-bold uppercase tracking-wider text-[9px] text-slate-400 dark:text-slate-500">${type}</p>
+        <p class="mt-0.5 font-medium leading-relaxed">${message}</p>
+      </div>
+    `;
+
+    container.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => {
+      toast.classList.remove("translate-y-2", "opacity-0");
+    }, 50);
+
+    // Animate out and remove
+    setTimeout(() => {
+      toast.classList.add("opacity-0", "translate-y-[-10px]");
+      setTimeout(() => {
+        toast.remove();
+      }, 300);
+    }, 4000);
+  }
+
+  // Home Page Metrics and Activity feed updater
+  async function updateHomeDashboard() {
+    const predictionsCountEl = document.getElementById("home-metric-predictions");
+    if (predictionsCountEl) {
+      predictionsCountEl.textContent = String(sessionPredictionsCount);
+    }
+
+    try {
+      // Fetch dynamic total app stats and category counts from backend dataset.json file
+      const datasetRes = await fetch("/api/eda-insights");
+      if (datasetRes.ok) {
+        const datasetData = await datasetRes.json();
+        const totalApps = datasetData.total_apps || 1250;
+        const totalCats = datasetData.categories_analyzed || 33;
+        
+        const totalAppsEl = document.getElementById("home-metric-total-apps");
+        const categoriesEl = document.getElementById("home-metric-categories");
+        if (totalAppsEl) totalAppsEl.textContent = totalApps.toLocaleString();
+        if (categoriesEl) categoriesEl.textContent = String(totalCats);
+      }
+    } catch (e) {
+      // Keep static defaults on error
+    }
+
+    // Populate Recent Activity Feed dynamically from history
+    try {
+      const emptyStateEl = document.getElementById("home-activity-empty");
+      const listEl = document.getElementById("home-activity-list");
+
+      if (!isLoggedIn) {
+        if (emptyStateEl) {
+          emptyStateEl.innerHTML = `
+            <span class="text-xs text-slate-400 dark:text-slate-500 block font-semibold">Sign in to view activity</span>
+            <button id="home-activity-login-btn" type="button" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded-lg border border-indigo-100 dark:border-indigo-900/30 transition-colors cursor-pointer">
+              Sign In
+            </button>
+          `;
+          emptyStateEl.classList.remove("hidden");
+        }
+        if (listEl) listEl.classList.add("hidden");
+        return;
+      }
+
+      const historyRes = await fetch(`/api/history?email=${encodeURIComponent(loggedInUserEmail)}`);
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+
+        if (historyData && historyData.length > 0) {
+          if (emptyStateEl) emptyStateEl.classList.add("hidden");
+          if (listEl) {
+            listEl.classList.remove("hidden");
+            // Show up to 3 most recent records
+            const recent = historyData.slice(0, 3);
+            listEl.innerHTML = recent.map((item: any) => {
+              const recordDate = item.date || item.timestamp || new Date().toISOString();
+              const formattedTime = new Date(recordDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const itemRating = item.rating || item.predictedRating || 4.3;
+              return `
+                <div class="flex items-start justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-800/40 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-800/50">
+                  <div class="space-y-0.5 truncate">
+                    <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 block truncate">${item.appName || 'Unknown App'}</span>
+                    <span class="text-[9px] text-slate-400 dark:text-slate-500 block">${item.category || 'Tools'} • ${formattedTime}</span>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <span class="text-[11px] font-extrabold text-indigo-600 dark:text-indigo-400 block">${Number(itemRating).toFixed(1)} ★</span>
+                    <span class="text-[8px] font-mono text-slate-400 block">${item.confidence || 92}% conf</span>
+                  </div>
+                </div>
+              `;
+            }).join("");
+          }
+        } else {
+          if (emptyStateEl) {
+            emptyStateEl.innerHTML = `
+              <span class="text-xs text-slate-400 dark:text-slate-500 block font-semibold">No recent operations</span>
+              <button onclick="document.getElementById('nav-prediction').click()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded-lg border border-indigo-100 dark:border-indigo-900/30 transition-colors">
+                Run Prediction
+              </button>
+            `;
+            emptyStateEl.classList.remove("hidden");
+          }
+          if (listEl) listEl.classList.add("hidden");
+        }
+      }
+    } catch (e) {
+      // Suppress activity list error gracefully
+    }
+  }
+
+  // Global Search Autocomplete Logic
+  const searchInput = document.getElementById("global-search-input") as HTMLInputElement;
+  const searchAutocomplete = document.getElementById("search-autocomplete");
+
+  if (searchInput && searchAutocomplete) {
+    // Static searchable database of index pages, segment categories
+    const searchableIndex = [
+      { type: "screen", label: "Prediction Engine", id: "page-prediction" },
+      { type: "screen", label: "Competitor Analysis", id: "page-competitor" },
+      { type: "screen", label: "Market Trend Comparison", id: "page-trend" },
+      { type: "screen", label: "AI Advisor Expert", id: "page-advisor" },
+      { type: "screen", label: "Market EDA Insights", id: "page-eda-insights" },
+      { type: "screen", label: "EDA Empirical Dashboard", id: "page-eda-dashboard" },
+      { type: "screen", label: "Diagnostic History", id: "page-history" },
+      { type: "screen", label: "System Information (About)", id: "page-about" },
+      { type: "category", label: "Game Segment Insights", id: "page-eda-insights", term: "GAME" },
+      { type: "category", label: "Productivity Apps Benchmark", id: "page-eda-insights", term: "PRODUCTIVITY" },
+      { type: "category", label: "Tools Niche Analysis", id: "page-eda-insights", term: "TOOLS" },
+      { type: "category", label: "Medical Market Demographics", id: "page-eda-insights", term: "MEDICAL" },
+      { type: "category", label: "Finance Segment Trends", id: "page-eda-insights", term: "FINANCE" }
+    ];
+
+    searchInput.addEventListener("input", () => {
+      const query = searchInput.value.toLowerCase().trim();
+      if (!query) {
+        searchAutocomplete.classList.add("hidden");
+        return;
+      }
+
+      // Filter matches
+      const matches = searchableIndex.filter(item => 
+        item.label.toLowerCase().includes(query) || 
+        (item.term && item.term.toLowerCase().includes(query))
+      ).slice(0, 5);
+
+      if (matches.length > 0) {
+        searchAutocomplete.innerHTML = matches.map(item => `
+          <div data-id="${item.id}" data-term="${item.term || ''}" class="autocomplete-item px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/80 cursor-pointer text-xs flex justify-between items-center transition-colors border-b border-slate-100 dark:border-slate-800 last:border-0">
+            <span class="font-medium text-slate-800 dark:text-slate-200">${item.label}</span>
+            <span class="text-[8px] uppercase tracking-wider font-bold bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/30">${item.type}</span>
+          </div>
+        `).join("");
+        searchAutocomplete.classList.remove("hidden");
+
+        // Add event listeners to autocomplete items
+        searchAutocomplete.querySelectorAll(".autocomplete-item").forEach(itemEl => {
+          itemEl.addEventListener("click", () => {
+            const pageId = itemEl.getAttribute("data-id") || "page-home";
+            const term = itemEl.getAttribute("data-term");
+            
+            // Navigate directly to selected screen
+            switchPage(pageId);
+            
+            if (term && pageId === "page-eda-insights") {
+              const edaSelect = document.getElementById("eda-insights-category") as HTMLSelectElement;
+              if (edaSelect) {
+                edaSelect.value = term;
+                // Trigger refresh if needed
+                edaSelect.dispatchEvent(new Event("change"));
+              }
+            }
+
+            // Clear & close
+            searchInput.value = "";
+            searchAutocomplete.classList.add("hidden");
+          });
+        });
+      } else {
+        searchAutocomplete.innerHTML = `
+          <div class="px-3 py-3 text-center text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+            No matching resources found.
+          </div>
+        `;
+        searchAutocomplete.classList.remove("hidden");
+      }
+    });
+
+    // Close autocomplete on clicking outside
+    document.addEventListener("click", (e) => {
+      if (!searchInput.contains(e.target as Node) && !searchAutocomplete.contains(e.target as Node)) {
+        searchAutocomplete.classList.add("hidden");
+      }
+    });
+  }
+
+  // PDF & CSV Export Function Handlers
+  const exportPdfBtn = document.getElementById("export-pdf-btn");
+  const exportCsvBtn = document.getElementById("export-csv-btn");
+
+  if (exportPdfBtn) {
+    exportPdfBtn.addEventListener("click", () => {
+      if (!lastPredictionData) {
+        showToast("No active prediction data report to export. Please run a forecast first.", "error");
+        return;
+      }
+
+      try {
+        const reportTitle = `${lastPredictionData.appName} Specification Analysis`;
+        const printWindow = window.open("", "_blank");
+        if (!printWindow) {
+          showToast("Failed to open report window due to popup blocker constraints.", "error");
+          return;
+        }
+
+        const shapHtml = Object.entries(lastPredictionData.shap_values || {}).map(([key, val]) => {
+          const numVal = Number(val);
+          const colorClass = numVal >= 0 ? "text-emerald-600" : "text-rose-600";
+          const sign = numVal >= 0 ? "+" : "";
+          return `<tr><td style="padding:8px; border-bottom:1px solid #eee;">${key}</td><td style="padding:8px; border-bottom:1px solid #eee;" class="${colorClass}">${sign}${numVal.toFixed(4)}</td></tr>`;
+        }).join("");
+
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>RateIQ Diagnostic Report - ${lastPredictionData.appName}</title>
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1e293b; padding: 40px; }
+                .card { border: 1px solid #e2e8f0; border-radius: 16px; padding: 32px; max-width: 650px; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+                .header { border-bottom: 2px solid #6366f1; padding-bottom: 16px; margin-bottom: 24px; }
+                .grid { display: grid; grid-template-cols: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+                .metric { background: #f8fafc; border: 1px solid #f1f5f9; padding: 16px; border-radius: 12px; }
+                .value { font-size: 24px; font-weight: 800; color: #0f172a; margin-top: 4px; }
+                .label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+                .title { font-size: 20px; font-weight: 900; margin: 0; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 16px; }
+                th { text-align: left; background: #f1f5f9; padding: 8px; }
+                .text-emerald-600 { color: #059669; font-weight: bold; }
+                .text-rose-600 { color: #dc2626; font-weight: bold; }
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <div class="header">
+                  <span class="label" style="color: #6366f1;">RateIQ ML Report</span>
+                  <h1 class="title">${reportTitle}</h1>
+                </div>
+                <div class="grid">
+                  <div class="metric">
+                    <span class="label">Predicted Rating</span>
+                    <div class="value">${Number(lastPredictionData.rating).toFixed(2)} ★</div>
+                  </div>
+                  <div class="metric">
+                    <span class="label">Model Confidence</span>
+                    <div class="value">${lastPredictionData.confidence || 92}%</div>
+                  </div>
+                </div>
+                <h3>SHAP Parameter Contributions</h3>
+                <table>
+                  <thead>
+                    <tr><th>Specification Property</th><th>Impact Force</th></tr>
+                  </thead>
+                  <tbody>
+                    ${shapHtml}
+                  </tbody>
+                </table>
+                <div style="margin-top:32px; font-size:10px; color:#94a3b8; text-align:center;">
+                  Generated securely by RateIQ Enterprise Predictive Analytics Workspace on ${new Date().toLocaleDateString()}.
+                </div>
+              </div>
+              <script>
+                window.onload = function() { window.print(); }
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        showToast("PDF report preview sent to compiler window.", "success");
+      } catch (err) {
+        showToast("Popup blocked. Allow popups to download PDF specifications reports.", "error");
+      }
+    });
+  }
+
+  if (exportCsvBtn) {
+    exportCsvBtn.addEventListener("click", () => {
+      if (!lastPredictionData) {
+        showToast("No active prediction data report to export. Please run a forecast first.", "error");
+        return;
+      }
+
+      try {
+        const rows = [
+          ["Parameter Property", "Value", "SHAP Impact Value"],
+          ["App Name", lastPredictionData.appName, ""],
+          ["Market Category", lastPredictionData.category, lastPredictionData.shap_values?.["Category Fit"] || 0],
+          ["Installs Volume", lastPredictionData.installs, lastPredictionData.shap_values?.["Engagement Ratio"] || 0],
+          ["Review Influx Density", lastPredictionData.reviews, ""],
+          ["Size Payload (MB)", lastPredictionData.size, lastPredictionData.shap_values?.["Package Size"] || 0],
+          ["Contains In-App Ads", lastPredictionData.ads, lastPredictionData.shap_values?.["Ad Presence"] || 0],
+          ["Model Predicted Rating Target", lastPredictionData.rating, ""],
+          ["Statistical Classification Confidence", lastPredictionData.confidence || 92, ""]
+        ];
+
+        const csvContent = "data:text/csv;charset=utf-8," 
+          + rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `rateiq_report_${lastPredictionData.appName.replace(/\s+/g, "_").toLowerCase()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showToast("CSV data specs sheet exported successfully.", "success");
+      } catch (err) {
+        showToast("An error occurred compiling the CSV dataset schema.", "error");
+      }
+    });
+  }
+
+  // ----------------- CONTACT FORM SYSTEM -----------------
+  const contactForm = document.getElementById("contact-form") as HTMLFormElement | null;
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nameInput = document.getElementById("contact-name") as HTMLInputElement | null;
+      const emailInput = document.getElementById("contact-email") as HTMLInputElement | null;
+      const messageInput = document.getElementById("contact-message") as HTMLTextAreaElement | null;
+      const feedbackEl = document.getElementById("contact-feedback");
+      const submitBtn = document.getElementById("contact-submit-btn") as HTMLButtonElement | null;
+      const submitText = document.getElementById("contact-submit-text");
+
+      if (!nameInput || !emailInput || !messageInput || !feedbackEl) return;
+
+      const name = nameInput.value.trim();
+      const email = emailInput.value.trim();
+      const message = messageInput.value.trim();
+
+      // Basic validation
+      if (!name || !email || !message) {
+        feedbackEl.textContent = "All fields are required.";
+        feedbackEl.className = "text-xs font-medium p-3 rounded-xl border border-rose-200 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400";
+        feedbackEl.classList.remove("hidden");
+        return;
+      }
+
+      // Valid email check
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        feedbackEl.textContent = "Please enter a valid email address.";
+        feedbackEl.className = "text-xs font-medium p-3 rounded-xl border border-rose-200 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400";
+        feedbackEl.classList.remove("hidden");
+        return;
+      }
+
+      // Hide previous feedback
+      feedbackEl.classList.add("hidden");
+
+      // Retrieve EmailJS configuration
+      const serviceId = (import.meta as any).env.VITE_EMAILJS_SERVICE_ID || "";
+      const templateId = (import.meta as any).env.VITE_EMAILJS_TEMPLATE_ID || "";
+      const publicKey = (import.meta as any).env.VITE_EMAILJS_PUBLIC_KEY || "";
+
+      // Disable button and show sending status
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitText) submitText.textContent = "Sending...";
+
+      try {
+        if (!serviceId || !templateId || !publicKey) {
+          throw new Error("EmailJS configuration is missing. Please define VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY.");
+        }
+
+        const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            service_id: serviceId,
+            template_id: templateId,
+            user_id: publicKey,
+            template_params: {
+              from_name: name,
+              from_email: email,
+              message: message,
+              to_email: "ramumurugan0806@gmail.com",
+            },
+          }),
+        });
+
+        if (response.ok) {
+          feedbackEl.textContent = "Message sent successfully!";
+          feedbackEl.className = "text-xs font-medium p-3 rounded-xl border border-emerald-200 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400";
+          feedbackEl.classList.remove("hidden");
+          contactForm.reset();
+          showToast("Message sent successfully!", "success");
+        } else {
+          const errorText = await response.text();
+          throw new Error(errorText || "EmailJS delivery failed");
+        }
+      } catch (err: any) {
+        console.error("EmailJS Error:", err);
+        feedbackEl.textContent = `Error: ${err?.message || "Failed to send message."}`;
+        feedbackEl.className = "text-xs font-medium p-3 rounded-xl border border-rose-200 dark:border-rose-900/30 bg-rose-50/50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400";
+        feedbackEl.classList.remove("hidden");
+        showToast(err?.message || "Failed to send message.", "error");
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.textContent = "Send Message";
+      }
+    });
+  }
+
+  // Pre-load Home Dashboard values once at start
+  updateHomeDashboard();
 
   // Default page is home
   switchPage("page-home");

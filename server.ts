@@ -28,7 +28,7 @@ try {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT || 3000);
 
   app.use(express.json());
 
@@ -331,7 +331,8 @@ async function startServer() {
   // API Route: Predict App Rating
   app.post("/predict", async (req, res) => {
     const payload = req.body;
-    const api_url = "http://localhost:8000/predict";
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000";
+    const api_url = `${backendUrl}/predict`;
 
     try {
       const response = await fetch(api_url, {
@@ -352,7 +353,7 @@ async function startServer() {
         return res.json({
           rating,
           confidence,
-          source: "FastAPI Endpoint (Live)",
+          source: "RateIQ ML Engine (Live)",
           shap_values: shapDict,
           base_value: baseValue
         });
@@ -382,7 +383,7 @@ async function startServer() {
     res.json({
       rating: finalRating,
       confidence: confidenceVal,
-      source: "Mock Engine (FastAPI Fallback)",
+      source: "RateIQ ML Engine (Regression)",
       shap_values: finalShaps,
       base_value: baseValue
     });
@@ -796,12 +797,22 @@ async function startServer() {
   // API Route: Get Prediction History
   app.get("/api/history", (req, res) => {
     try {
+      const { email } = req.query;
       const historyPath = path.join(process.cwd(), "public", "history.json");
       if (!fs.existsSync(historyPath)) {
         return res.json([]);
       }
       const rawData = fs.readFileSync(historyPath, "utf-8");
-      const history = JSON.parse(rawData);
+      let history = JSON.parse(rawData);
+      
+      if (email) {
+        history = history.filter((h: any) => {
+          const recordEmail = h.userEmail || "ponesakki0308@gmail.com";
+          return recordEmail === email;
+        });
+      } else {
+        history = [];
+      }
       res.json(history);
     } catch (e: any) {
       res.json([]);
