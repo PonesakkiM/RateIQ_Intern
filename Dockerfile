@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install ALL dependencies (including devDependencies like esbuild, typescript, etc.)
-RUN npm ci
+RUN npm install
 
 # Copy the rest of the application files
 COPY . .
@@ -28,7 +28,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies to keep the image super light
-RUN npm ci --only=production
+RUN npm install --omit=dev
 
 # Copy built application assets and code from the builder stage
 COPY --from=builder /app/dist ./dist
