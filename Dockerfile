@@ -14,6 +14,16 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+# Build arguments for EmailJS configuration
+ARG VITE_EMAILJS_SERVICE_ID=service_q3lh32w
+ARG VITE_EMAILJS_TEMPLATE_ID=template_prdojv7
+ARG VITE_EMAILJS_PUBLIC_KEY=Nog5_tnwcZQZbocsW
+
+# Expose them as environment variables for Vite at build time
+ENV VITE_EMAILJS_SERVICE_ID=$VITE_EMAILJS_SERVICE_ID
+ENV VITE_EMAILJS_TEMPLATE_ID=$VITE_EMAILJS_TEMPLATE_ID
+ENV VITE_EMAILJS_PUBLIC_KEY=$VITE_EMAILJS_PUBLIC_KEY
+
 # Build the frontend assets and bundle the backend server.ts using the package script
 RUN npm run build
 
