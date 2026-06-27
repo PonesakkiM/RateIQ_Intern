@@ -807,7 +807,7 @@ async function startServer() {
       
       if (email) {
         history = history.filter((h: any) => {
-          const recordEmail = h.userEmail || "ponesakki0308@gmail.com";
+          const recordEmail = h.userEmail || "guest@rateiq.io";
           return recordEmail === email;
         });
       } else {

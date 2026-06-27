@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ----------------- FRONTEND AUTH SYSTEM (UI-ONLY) -----------------
   let isLoggedIn = localStorage.getItem("rateiq_logged_in") === "true";
-  let loggedInUserEmail = localStorage.getItem("rateiq_user_email") || "ponesakki0308@gmail.com";
+  let loggedInUserEmail = localStorage.getItem("rateiq_user_email") || "";
 
   // ----------------- THEME SYSTEM -----------------
   function initializeTheme() {
@@ -603,7 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const inputMode = (currentInputMode === "url") ? "URL" : "Manual";
 
       const historyRecord = {
-        userEmail: isLoggedIn ? loggedInUserEmail : "ponesakki0308@gmail.com",
+        userEmail: isLoggedIn ? loggedInUserEmail : "guest@rateiq.io",
         appName: payload.app_name,
         category: payload.category,
         rating: rating,
@@ -639,6 +639,10 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     if (!emptyState || !loadingState || !resultContent) return;
+
+    // Hide Demo Preview badge
+    const demoBadge = document.getElementById("demo-preview-badge");
+    if (demoBadge) demoBadge.classList.add("hidden");
 
     // Transition elements visibility
     emptyState.classList.add("hidden");
@@ -819,6 +823,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Reset results views
     if (emptyState && loadingState && resultContent) {
+      const demoBadge = document.getElementById("demo-preview-badge");
+      if (demoBadge) demoBadge.classList.add("hidden");
+
       resultContent.classList.add("hidden");
       recommendationsCard.classList.add("hidden");
       const competitorCard = document.getElementById("competitor-card");
@@ -2232,7 +2239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCompareButtonState();
 
     try {
-      const response = await fetch(`/api/history?email=${encodeURIComponent(isLoggedIn ? loggedInUserEmail : "ponesakki0308@gmail.com")}`);
+      const response = await fetch(`/api/history?email=${encodeURIComponent(isLoggedIn ? loggedInUserEmail : "guest@rateiq.io")}`);
       if (!response.ok) throw new Error("Failed to load history list");
       loadedHistoryRecords = await response.json();
       renderHistoryItems();
@@ -2895,6 +2902,11 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       if (loggedOutEl) loggedOutEl.classList.remove("hidden");
       if (loggedInEl) loggedInEl.classList.add("hidden");
+      
+      const headerEmailEl = document.getElementById("header-email");
+      const dropdownEmailEl = document.getElementById("dropdown-user-email");
+      if (headerEmailEl) headerEmailEl.textContent = "";
+      if (dropdownEmailEl) dropdownEmailEl.textContent = "Guest Session";
     }
     
     // Refresh dashboard values to display correct scoping
@@ -2972,7 +2984,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const signupNameInput = document.getElementById("signup-name") as HTMLInputElement | null;
       
       if (signupEmailInput) {
-        loggedInUserEmail = signupEmailInput.value.trim() || "ponesakki0308@gmail.com";
+        loggedInUserEmail = signupEmailInput.value.trim() || "guest@rateiq.io";
         localStorage.setItem("rateiq_user_email", loggedInUserEmail);
       }
       if (signupNameInput) {
@@ -2997,7 +3009,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const loginEmailInput = document.getElementById("login-email") as HTMLInputElement;
       if (loginEmailInput) {
-        loggedInUserEmail = loginEmailInput.value.trim() || "ponesakki0308@gmail.com";
+        loggedInUserEmail = loginEmailInput.value.trim() || "guest@rateiq.io";
         localStorage.setItem("rateiq_user_email", loggedInUserEmail);
       }
       
@@ -3022,7 +3034,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    loggedInUserEmail = "ponesakki0308@gmail.com"; // Reset to default
+    loggedInUserEmail = ""; // Reset to default
     
     // Empty login fields
     const loginEmailInput = document.getElementById("login-email") as HTMLInputElement | null;
@@ -3063,13 +3075,43 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Handle Mobile Sidebar toggle
+  // Handle Mobile Sidebar toggle and click-outside dismissal
   if (sidebarToggle && sidebarEl) {
-    sidebarToggle.addEventListener("click", () => {
-      sidebarEl.classList.toggle("hidden");
-      sidebarEl.classList.toggle("flex");
+    sidebarToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (sidebarEl.classList.contains("hidden")) {
+        sidebarEl.classList.remove("hidden");
+        sidebarEl.classList.add("flex");
+      } else {
+        sidebarEl.classList.add("hidden");
+        sidebarEl.classList.remove("flex");
+      }
+    });
+
+    // Close mobile sidebar when clicking outside of it
+    document.addEventListener("click", (e) => {
+      if (window.innerWidth < 768 && sidebarEl && !sidebarEl.classList.contains("hidden")) {
+        const target = e.target as HTMLElement;
+        if (!sidebarEl.contains(target) && !sidebarToggle.contains(target)) {
+          sidebarEl.classList.add("hidden");
+          sidebarEl.classList.remove("flex");
+        }
+      }
     });
   }
+
+  // Ensure sidebar visibility state matches screen size correctly on resize
+  window.addEventListener("resize", () => {
+    if (sidebarEl) {
+      if (window.innerWidth >= 768) {
+        sidebarEl.classList.remove("hidden");
+        sidebarEl.classList.add("flex");
+      } else {
+        sidebarEl.classList.add("hidden");
+        sidebarEl.classList.remove("flex");
+      }
+    }
+  });
 
   // System 3-Dot (⋮) Menu Interaction Logic
   const threeDotBtn = document.getElementById("three-dot-menu-btn");
@@ -3174,7 +3216,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ----------------- SaaS CUSTOM ENGINE EXTENSIONS -----------------
 
   // Smart Alert Toast System
-  function showToast(message: string, type: "success" | "error" | "info" = "success") {
+  function showToast(message: string, type: "success" | "error" | "info" = "success", duration: number = 4000) {
     // Check if toast container exists
     let container = document.getElementById("toast-container");
     if (!container) {
@@ -3200,10 +3242,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     toast.innerHTML = `
       ${type === "success" ? successIcon : type === "error" ? errorIcon : infoIcon}
-      <div class="flex-1">
+      <div class="flex-1 pr-4">
         <p class="font-bold uppercase tracking-wider text-[9px] text-slate-400 dark:text-slate-500">${type}</p>
         <p class="mt-0.5 font-medium leading-relaxed">${message}</p>
       </div>
+      <button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer shrink-0 mt-0.5 focus:outline-hidden" onclick="this.parentElement.remove()">
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
     `;
 
     container.appendChild(toast);
@@ -3215,11 +3262,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Animate out and remove
     setTimeout(() => {
-      toast.classList.add("opacity-0", "translate-y-[-10px]");
-      setTimeout(() => {
-        toast.remove();
-      }, 300);
-    }, 4000);
+      if (toast.parentElement) {
+        toast.classList.add("opacity-0", "translate-y-[-10px]");
+        setTimeout(() => {
+          toast.remove();
+        }, 300);
+      }
+    }, duration);
   }
 
   // Home Page Metrics and Activity feed updater
@@ -3616,8 +3665,73 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Auto-loads a high-quality sample prediction for user demonstration on first visit
+  async function loadDemoPrediction() {
+    if (sessionPredictionsCount > 0) return;
+
+    const appName = "FlowTask Organizer Pro";
+    const category = "PRODUCTIVITY";
+    const installs = 100000;
+    const reviews = 2500;
+    const size = 12;
+    const ads = "No";
+    const lastUpdatedDays = 15;
+    const rating = 4.58;
+    const confidence = 94;
+    const shap_values = {
+      "Ad Presence": 0.22,
+      "App Size": 0.15,
+      "Update Recency": 0.08,
+      "Engagement Ratio": 0.11
+    };
+
+    activeBaseRating = rating;
+
+    lastPredictionData = {
+      category,
+      rating,
+      installs,
+      reviews,
+      appName,
+      confidence,
+      shap_values,
+      updates: lastUpdatedDays,
+      ads,
+      size
+    };
+
+    if (resultTitle) resultTitle.textContent = `${appName} Analysis Report`;
+    if (ratingMetric) ratingMetric.textContent = `${rating.toFixed(2)} / 5.0`;
+    if (sourceMetric) sourceMetric.textContent = "Source: Demo Preview";
+    if (confidenceMetric) confidenceMetric.textContent = `${confidence}%`;
+
+    const strengthMetric = document.getElementById("strength-metric");
+    const riskMetric = document.getElementById("risk-metric");
+    if (strengthMetric) strengthMetric.textContent = "Ad-Free Status";
+    if (riskMetric) riskMetric.textContent = "No Major Risks";
+
+    renderShapBars(shap_values);
+    renderMarketTrend(category, rating);
+    renderRecommendations(shap_values, ads, reviews, installs, lastUpdatedDays);
+    
+    await renderCompetitorAnalysis(category, rating, installs, reviews, appName);
+
+    const demoBadge = document.getElementById("demo-preview-badge");
+    if (demoBadge) demoBadge.classList.remove("hidden");
+
+    if (emptyState) emptyState.classList.add("hidden");
+    if (loadingState) loadingState.classList.add("hidden");
+    if (resultContent) resultContent.classList.remove("hidden");
+  }
+
   // Pre-load Home Dashboard values once at start
   updateHomeDashboard();
+
+  // Load the Demo Prediction auto-load immediately on startup
+  loadDemoPrediction();
+
+  // Show cold start toast on initial page load (one-time dismissible toast, auto-dismiss after 6 seconds)
+  showToast("Server is waking up — first load may take 10–15 seconds. Please wait.", "info", 6000);
 
   // Default page is home
   switchPage("page-home");

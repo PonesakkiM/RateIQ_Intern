@@ -84,7 +84,7 @@
             </div>
             <div class="hidden sm:block text-left">
               <span id="header-username" class="block font-bold text-slate-800 dark:text-slate-200 leading-none">User Session</span>
-              <span id="header-email" class="block text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-[130px]">user@rateiq.io</span>
+              <span id="header-email" class="block text-[9px] text-slate-400 dark:text-slate-500 mt-0.5 truncate max-w-[130px]"></span>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@
             <!-- User Details Area -->
             <div class="px-4 py-2.5 text-xs">
               <p class="font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider text-[9px]">Account Profile</p>
-              <p id="dropdown-user-email" class="font-bold text-slate-800 dark:text-slate-200 truncate mt-0.5">user@rateiq.io</p>
+              <p id="dropdown-user-email" class="font-bold text-slate-800 dark:text-slate-200 truncate mt-0.5">Guest Session</p>
             </div>
             <!-- Main Actions -->
             <div class="py-1">
@@ -247,6 +247,21 @@
               <button onclick="document.getElementById('nav-eda-insights').click()" class="px-6 py-3 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 text-xs font-bold rounded-xl shadow-xs transition-all duration-200 cursor-pointer">
                 Explore Insights
               </button>
+            </div>
+
+            <!-- Video/GIF Placeholder Card -->
+            <div class="mt-8 max-w-sm mx-auto aspect-video rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-100/80 dark:bg-slate-950/40 flex flex-col items-center justify-center group cursor-pointer hover:border-indigo-500/50 transition-all shadow-xs relative overflow-hidden">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent"></div>
+              <div class="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
+              
+              <div class="relative z-10 flex flex-col items-center space-y-3">
+                <div class="h-10 w-10 rounded-full bg-indigo-600 dark:bg-indigo-500 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <svg class="h-4.5 w-4.5 fill-current ml-0.5" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+                <span class="text-[10px] font-bold text-slate-700 dark:text-slate-200 tracking-wide uppercase">Watch Demo (60s)</span>
+              </div>
             </div>
           </div>
 
@@ -1996,7 +2011,7 @@
               <div class="md:col-span-2 space-y-3 text-xs md:pl-4">
                 <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-900">
                   <span class="text-slate-400 dark:text-slate-500 font-medium">Email Address</span>
-                  <span id="profile-email-text" class="font-bold text-slate-800 dark:text-slate-200">ponesakki0308@gmail.com</span>
+                  <span id="profile-email-text" class="font-bold text-slate-800 dark:text-slate-200">guest@rateiq.io</span>
                 </div>
                 <div class="flex justify-between py-1.5 border-b border-slate-100 dark:border-slate-900">
                   <span class="text-slate-400 dark:text-slate-500 font-medium">Organization</span>
@@ -2605,8 +2620,11 @@
           <div id="result-content" class="hidden space-y-6">
             <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
               <div>
-                <span class="text-[9px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Analysis Assessment</span>
-                <h2 class="text-base font-black text-slate-900 dark:text-white mt-0.5" id="result-title font-display">Analysis Report</h2>
+                <div class="flex items-center gap-2">
+                  <span class="text-[9px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Analysis Assessment</span>
+                  <span id="demo-preview-badge" class="hidden bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Demo Preview</span>
+                </div>
+                <h2 class="text-base font-black text-slate-900 dark:text-white mt-0.5 font-display" id="result-title">Analysis Report</h2>
               </div>
               <div class="flex items-center space-x-2">
                 <!-- PDF Export Options -->
