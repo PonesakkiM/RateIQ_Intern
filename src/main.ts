@@ -603,7 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const inputMode = (currentInputMode === "url") ? "URL" : "Manual";
 
       const historyRecord = {
-        userEmail: isLoggedIn ? loggedInUserEmail : "guest@rateiq.io",
+        userEmail: isLoggedIn ? loggedInUserEmail : "",
         appName: payload.app_name,
         category: payload.category,
         rating: rating,
@@ -2239,7 +2239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateCompareButtonState();
 
     try {
-      const response = await fetch(`/api/history?email=${encodeURIComponent(isLoggedIn ? loggedInUserEmail : "guest@rateiq.io")}`);
+      const response = await fetch(`/api/history?email=${encodeURIComponent(isLoggedIn ? loggedInUserEmail : "")}`);
       if (!response.ok) throw new Error("Failed to load history list");
       loadedHistoryRecords = await response.json();
       renderHistoryItems();
@@ -2811,8 +2811,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       const profileNameTitle = document.getElementById("profile-name-title");
       const profileFullNameInput = document.getElementById("profile-full-name") as HTMLInputElement | null;
-      const savedName = localStorage.getItem("rateiq_profile_name") || loggedInUserEmail.split("@")[0];
-      const displayName = savedName.charAt(0).toUpperCase() + savedName.slice(1);
+      const savedName = isLoggedIn ? (localStorage.getItem("rateiq_profile_name") || loggedInUserEmail.split("@")[0] || "") : "";
+      const displayName = savedName ? (savedName.charAt(0).toUpperCase() + savedName.slice(1)) : "—";
       if (profileNameTitle) {
         profileNameTitle.textContent = displayName;
       }
@@ -2822,9 +2822,9 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const profileCompanyText = document.getElementById("profile-company-text");
       const profileCompanyInput = document.getElementById("profile-company") as HTMLInputElement | null;
-      const savedCompany = localStorage.getItem("rateiq_profile_company") || "RateIQ Enterprise";
+      const savedCompany = isLoggedIn ? (localStorage.getItem("rateiq_profile_company") || "") : "";
       if (profileCompanyText) {
-        profileCompanyText.textContent = savedCompany;
+        profileCompanyText.textContent = savedCompany || "—";
       }
       if (profileCompanyInput) {
         profileCompanyInput.value = savedCompany;
@@ -2984,7 +2984,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const signupNameInput = document.getElementById("signup-name") as HTMLInputElement | null;
       
       if (signupEmailInput) {
-        loggedInUserEmail = signupEmailInput.value.trim() || "guest@rateiq.io";
+        loggedInUserEmail = signupEmailInput.value.trim() || "";
         localStorage.setItem("rateiq_user_email", loggedInUserEmail);
       }
       if (signupNameInput) {
@@ -3009,7 +3009,7 @@ document.addEventListener("DOMContentLoaded", () => {
       
       const loginEmailInput = document.getElementById("login-email") as HTMLInputElement;
       if (loginEmailInput) {
-        loggedInUserEmail = loginEmailInput.value.trim() || "guest@rateiq.io";
+        loggedInUserEmail = loginEmailInput.value.trim() || "";
         localStorage.setItem("rateiq_user_email", loggedInUserEmail);
       }
       
@@ -3516,7 +3516,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   </tbody>
                 </table>
                 <div style="margin-top:32px; font-size:10px; color:#94a3b8; text-align:center;">
-                  Generated securely by RateIQ Enterprise Predictive Analytics Workspace on ${new Date().toLocaleDateString()}.
+                  Generated securely by RateIQ Predictive Analytics Workspace on ${new Date().toLocaleDateString()}.
                 </div>
               </div>
               <script>
