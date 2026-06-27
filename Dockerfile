@@ -33,7 +33,6 @@ RUN npm install --omit=dev
 # Copy built application assets and code from the builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/logo_base64.txt ./logo_base64.txt
 
 # Set production environment variables
 ENV NODE_ENV=production
