@@ -544,17 +544,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const compRow = document.createElement("div");
             compRow.className = "flex items-center justify-between p-3 border border-slate-100 dark:border-slate-800/60 rounded-xl bg-slate-50/50 dark:bg-slate-950/20";
             compRow.innerHTML = `
-              <div class="space-y-0.5">
-                <div class="text-xs font-bold text-slate-800 dark:text-slate-200">${comp.appName}</div>
-                <div class="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                  ${formatInstalls(comp.installs)} Installs &bull; ${comp.reviews.toLocaleString()} Reviews
-                </div>
-              </div>
-              <div class="flex items-center space-x-1">
-                <span class="text-xs font-bold text-slate-700 dark:text-slate-300">${comp.rating.toFixed(1)}</span>
-                <svg class="h-3 w-3 text-amber-500 fill-current" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                </svg>
+              <div class="flex items-center space-x-2">
+                <span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+                <span class="text-xs font-semibold text-slate-800 dark:text-slate-200">${comp.appName}</span>
               </div>
             `;
             competitorsListContainer.appendChild(compRow);
@@ -1041,40 +1033,26 @@ document.addEventListener("DOMContentLoaded", () => {
       const badgeEl = document.getElementById("trend-category-badge");
       if (badgeEl) badgeEl.textContent = category.replace(/_/g, " ");
 
-      const predValEl = document.getElementById("trend-predicted-val");
-      if (predValEl) predValEl.textContent = predRating.toFixed(2);
-
-      const avgValEl = document.getElementById("trend-average-val");
-      if (avgValEl) avgValEl.textContent = catAvg.toFixed(2);
-
-      const diffBadgeEl = document.getElementById("trend-diff-badge");
       const posLabelEl = document.getElementById("trend-position-label");
       const posDescEl = document.getElementById("trend-position-desc");
 
-      let positionLabel = "Near Average";
-      let positionClass = "text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider";
-      let diffText = (diff >= 0 ? "+" : "") + diff.toFixed(2);
-      let diffClass = diff >= 0 ? "text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/50 bg-emerald-50/50 dark:bg-emerald-950/10" : "text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-800/50 bg-rose-50/50 dark:bg-rose-950/10";
+      let positionLabel = "Inline";
       let positionDesc = "";
 
       if (diff > 0.1) {
         positionLabel = "Above Average";
-        positionDesc = `Your application's predicted rating of **${predRating.toFixed(2)}** is **+${diff.toFixed(2)}** points above the category average of **${catAvg.toFixed(2)}**. This suggests your feature configurations and specifications are highly competitive and possess robust quality factors that exceed standard category benchmarks.`;
+        positionDesc = `Within the competitive marketplace, your application's predicted rating delivers strong performance, positioning it comfortably above the standard category baseline. This indicates robust core feature alignment that exceeds typical market quality benchmarks.`;
       } else if (diff < -0.1) {
         positionLabel = "Below Average";
-        positionDesc = `Your application's predicted rating of **${predRating.toFixed(2)}** is **${diff.toFixed(2)}** points below the category baseline average of **${catAvg.toFixed(2)}**. We recommend reviewing negative SHAP impact factors (such as ad presence, excessive file size, or update recency) to close this performance gap.`;
+        positionDesc = `Within the competitive marketplace, your application's predicted rating falls below the standard category baseline. This suggests opportunities to close the performance gap by optimizing update cycles and refining core feature structures.`;
       } else {
         positionLabel = "Near Average";
-        positionDesc = `Your application's predicted rating of **${predRating.toFixed(2)}** is highly aligned with the category baseline average of **${catAvg.toFixed(2)}** (within a **${Math.abs(diff).toFixed(2)}** points deviation). Minor optimization tweaks to update frequency or ad configurations could easily push your product into the superior above-average tier.`;
+        positionDesc = `Within the competitive marketplace, your application's predicted rating aligns closely with the standard category baseline, indicating stable performance with potential to break into the superior tier through targeted quality refinements.`;
       }
 
-      if (diffBadgeEl) {
-        diffBadgeEl.textContent = diffText;
-        diffBadgeEl.className = "text-xs font-bold px-2.5 py-1 rounded-full border " + diffClass;
-      }
       if (posLabelEl) {
         posLabelEl.textContent = positionLabel;
-        posLabelEl.className = "text-xs font-bold uppercase tracking-wider " + (diff > 0.1 ? "text-emerald-600 dark:text-emerald-400" : diff < -0.1 ? "text-rose-600 dark:text-rose-400" : "text-amber-600 dark:text-amber-400");
+        posLabelEl.className = "text-xs font-black px-3.5 py-1.5 rounded-xl border " + (diff > 0.1 ? "text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/30" : diff < -0.1 ? "text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800 bg-rose-50/30 dark:bg-rose-950/30" : "text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/30");
       }
       if (posDescEl) {
         posDescEl.innerHTML = positionDesc.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
@@ -1096,11 +1074,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const rDiff = r2026 - r2021;
       let ratingInsight = "";
       if (rDiff > 0.02) {
-        ratingInsight = `The category average has exhibited a clear **increasing trend** of **+${rDiff.toFixed(2)}** points over the last 5 years, rising from ${r2021.toFixed(2)} to ${r2026.toFixed(2)}. This reflects aggregate quality improvement and rising user standards across the competitive landscape.`;
+        ratingInsight = `The category average has exhibited a clear **increasing trend** over time. This reflects continuous aggregate quality improvements and rising user expectations across the competitive landscape.`;
       } else if (rDiff < -0.02) {
-        ratingInsight = `The category average shows a clear **decreasing trend** of **${rDiff.toFixed(2)}** points over the last 5 years, dropping from ${r2021.toFixed(2)} to ${r2026.toFixed(2)}. This suggests intensifying user fatigue, higher critical scrutiny, or saturation of competitive quality.`;
+        ratingInsight = `The category average shows a clear **decreasing trend** over time. This suggests intensifying user fatigue, higher critical scrutiny, or saturation of competitive quality across the landscape.`;
       } else {
-        ratingInsight = `The category average exhibits a highly **stable trend**, hovering around a consolidated average of ${r2026.toFixed(2)} with less than ${Math.abs(rDiff).toFixed(2)} fluctuation. User feedback expectations remain highly consistent and predictable over time.`;
+        ratingInsight = `The category average exhibits a highly **stable trend** over time. User feedback expectations and product baseline quality levels remain consistent and predictable.`;
       }
       const riEl = document.getElementById("trend-rating-insight");
       if (riEl) {
@@ -1132,11 +1110,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let installRatingInsight = "";
       if (highAvg > lowAvg * 1.1) {
-        installRatingInsight = `High-rated applications (≥ 4.3) average **${Math.round(highAvg).toLocaleString()}** installs, which is significantly superior to lower-rated apps (**${Math.round(lowAvg).toLocaleString()}**). This demonstrates a clear compounding return where superior user reviews catalyze organic referral loops and lower user acquisition costs over time.`;
+        installRatingInsight = `Applications with higher user ratings experience significantly greater installation growth compared to lower-rated alternatives. This demonstrates a strong compounding return where superior user reviews catalyze organic discovery and amplify market scaling over time.`;
       } else if (lowAvg > highAvg * 1.1) {
-        installRatingInsight = `Interestingly, lower-rated applications in this category average **${Math.round(lowAvg).toLocaleString()}** installs, while highly-rated ones sit at **${Math.round(highAvg).toLocaleString()}**. This indicates that legacy first-mover advantages or aggressive programmatic advertising distribution channels dominate user acquisition over pure rating scores.`;
+        installRatingInsight = `Lower-rated applications in this category maintain solid installation volume, indicating that early-mover advantages or aggressive programmatic marketing distributions continue to support acquisition alongside pure rating feedback.`;
       } else {
-        installRatingInsight = `Average installations are roughly similar between high-rated (**${Math.round(highAvg).toLocaleString()}**) and standard-rated apps (**${Math.round(lowAvg).toLocaleString()}**). User volume is driven evenly by product utility demands or specific localized marketing rather than being hyper-sensitive to rating disparities.`;
+        installRatingInsight = `Installation volumes are distributed relatively evenly across high-rated and standard-performing apps. This indicates that overall volume is driven consistently by practical user utility demands rather than being hyper-sensitive to minor rating variations.`;
       }
       const iiEl = document.getElementById("trend-install-insight");
       if (iiEl) {
@@ -1149,7 +1127,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const sortedFreqs = [...updateFreqTrend].sort((a, b) => b.avg - a.avg);
       const bestFreq = sortedFreqs[0];
-      const updateInsight = `The highest-performing cohort comprises apps updated on a **${bestFreq.label}** schedule, achieving a category-best average of **${bestFreq.avg.toFixed(2)} / 5.0**. This highlights how continuous quality assurance, agile feedback loops, and prompt functional releases maximize user sentiment in the **${category.replace(/_/g, " ")}** domain.`;
+      const updateInsight = `The highest-performing cohort comprises applications with a regular **${bestFreq.label}** update schedule. This highlights how active quality assurance, agile feedback loops, and prompt functional releases maximize user sentiment.`;
       const fiEl = document.getElementById("trend-frequency-insight");
       if (fiEl) {
         fiEl.innerHTML = updateInsight.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
@@ -1483,50 +1461,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const confidenceEl = document.getElementById("advisor-confidence");
       if (confidenceEl) confidenceEl.textContent = `${confidence}%`;
 
-      // 2. AI SUMMARY
-      const diffVal = predRating - catAvg;
-      const diffSign = diffVal >= 0 ? "+" : "";
+      // 2. EXECUTIVE AI SUMMARY (max 2 lines, no numeric values, averages, or differences)
       const summaryTextEl = document.getElementById("advisor-summary-text");
-      
-      let relativePosition = "near the category benchmark";
-      if (diffVal > 0.1) relativePosition = "firmly above standard benchmarks";
-      else if (diffVal < -0.1) relativePosition = "slightly trailing behind category norms";
-
-      let summaryExplanation = `Based on predictive analysis, <strong>${appName}</strong> is positioned for a <strong>${verdictLabel}</strong> in the <strong>${category.replace(/_/g, " ")}</strong> category. With a predicted rating of <strong>${predRating.toFixed(2)}</strong>, your product sits ${relativePosition} (average: <strong>${catAvg.toFixed(2)}</strong>). The model has evaluated this configuration with a high confidence rating of <strong>${confidence}%</strong>. By leveraging the specific positive impacts of your feature mix while proactively correcting the friction areas outlined below, you can further secure a top-tier market release.`;
-      
+      const summaryExplanation = `Based on predictive analysis, <strong>${appName}</strong> shows a <strong>${verdictLabel}</strong> profile in the <strong>${category.replace(/_/g, " ")}</strong> category. Leveraging key strengths while addressing high-impact risk factors will optimize the product's market launch.`;
       if (summaryTextEl) summaryTextEl.innerHTML = summaryExplanation;
 
-      // 3. MARKET POSITION
-      const catAvgEl = document.getElementById("advisor-cat-avg");
-      if (catAvgEl) catAvgEl.textContent = catAvg.toFixed(2);
-
-      const ratingDiffEl = document.getElementById("advisor-rating-diff");
-      if (ratingDiffEl) {
-        ratingDiffEl.textContent = `${diffSign}${diffVal.toFixed(2)}`;
-        ratingDiffEl.className = `text-xl font-black ${diffVal >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`;
-      }
-
-      const percentileRankEl = document.getElementById("advisor-percentile-rank");
-      if (percentileRankEl) {
-        percentileRankEl.textContent = `Top ${topPercentile}%`;
-        percentileRankEl.className = `text-xl font-black ${topPercentile <= 20 ? "text-emerald-600 dark:text-emerald-400" : topPercentile <= 50 ? "text-indigo-600 dark:text-indigo-400" : "text-amber-600 dark:text-amber-400"}`;
-      }
-
-      const categoryBadge = document.getElementById("advisor-category-badge");
-      if (categoryBadge) categoryBadge.textContent = category.replace(/_/g, " ");
-
-      const positionExplanationEl = document.getElementById("advisor-position-explanation");
-      let positionText = "";
-      if (diffVal > 0.1) {
-        positionText = `Your application is in an exceptionally strong position, outperforming <strong>${percentileRank}%</strong> of competitors in the <strong>${category.replace(/_/g, " ")}</strong> space. This places you in the elite <strong>Top ${topPercentile}%</strong>. Users are projected to appreciate your feature configuration, suggesting a highly reception-ready launch state.`;
-      } else if (diffVal < -0.1) {
-        positionText = `Your application is currently trailing <strong>${100 - percentileRank}%</strong> of category competitors, resulting in a ranking in the <strong>bottom ${100 - percentileRank}%</strong>. Immediate feature corrections in ad presentation, package file optimization, or update scheduling are highly recommended to match category baseline expectations.`;
-      } else {
-        positionText = `Your application is highly aligned with standard category averages, outperforming approximately <strong>${percentileRank}%</strong> of competitor options. Minor, high-leverage modifications to your release frequency or monetisation strategy can quickly elevate your predicted score into a premium Above Average position.`;
-      }
-      if (positionExplanationEl) positionExplanationEl.innerHTML = positionText;
-
-      // 4. STRENGTHS & RISKS
+      // 3. KEY STRENGTHS & RISK ASSESSMENT (removed "+0.xx" impact scores and kept concise)
       const shapDict = lastPredictionData.shap_values || {};
       const strengthsListEl = document.getElementById("advisor-strengths-list");
       const risksListEl = document.getElementById("advisor-risks-list");
@@ -1536,32 +1476,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const shapDescriptions: Record<string, { positive: string; negative: string }> = {
         "Engagement Ratio": {
-          positive: "Your high ratio of active reviews relative to total installations indicates users are highly motivated to engage and leave positive feedback.",
-          negative: "A low reviews-to-installs ratio indicates users find the app less engaging or lack easy prompting triggers to rate it."
+          positive: "High user engagement signals strong product interest.",
+          negative: "Low engagement indicates potential user friction."
         },
         "Type & Pricing": {
-          positive: "Your pricing configuration aligns perfectly with consumer expectations for this category, minimizing download friction.",
-          negative: "The current pricing model may introduce friction compared to free or cheaper competitors in this specific category."
+          positive: "Pricing strategy aligns with consumer expectations.",
+          negative: "Pricing model may introduce purchase resistance."
         },
         "Package Size": {
-          positive: "The optimized, compact package size ensures rapid downloads, low storage overhead, and fewer uninstalls on budget devices.",
-          negative: "The heavy file size footprint can lead to installation drop-offs, slow downloads, and device storage pressure."
+          positive: "Optimized file footprint ensures fast installation.",
+          negative: "Heavy application size may limit downloads."
         },
         "Ad Presence": {
-          positive: "Operating without intrusive advertisements provides a seamless, high-quality user experience that directly raises user sentiment.",
-          negative: "Integrating ad modules can disrupt the user flow, leading to negative feedback regarding usability and polish."
+          positive: "Ad-free experience enhances overall user sentiment.",
+          negative: "Intrusive ads disrupt user experience and workflow."
         },
         "Update Recency": {
-          positive: "A fresh update history signals active maintenance, rapid bug resolution, and strong developer commitment to the product.",
-          negative: "A delayed update cycle suggests potential compatibility issues, outstanding bugs, and stagnation to users."
+          positive: "Active update cycle signals regular maintenance.",
+          negative: "Delayed update frequency indicates slow maintenance."
         },
         "Category Fit": {
-          positive: "Your app specifications naturally align with high-performing, organic-demand niches within this specific category.",
-          negative: "Slight market category mismatch, exposing your application to standard genre-level audience friction."
+          positive: "App attributes align perfectly with target niche.",
+          negative: "Minor category mismatch impacts user appeal."
         },
         "Content Suitability": {
-          positive: "Broad content suitability ensures accessibility to the widest demographic, increasing mass-market satisfaction.",
-          negative: "Restrictive content rating limits absolute audience size and exposes your app to specialized criticism."
+          positive: "Broad audience rating maximizes market access.",
+          negative: "Restrictive rating limits potential reach."
         }
       };
 
@@ -1581,7 +1521,7 @@ document.addEventListener("DOMContentLoaded", () => {
           item.innerHTML = `
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400">${feature}</span>
-              <span class="text-[10px] font-mono font-black text-emerald-600 bg-emerald-100/40 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">+${val.toFixed(2)}</span>
+              <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100/40 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-md">Strength</span>
             </div>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${descObj.positive}</p>
           `;
@@ -1593,7 +1533,7 @@ document.addEventListener("DOMContentLoaded", () => {
           item.innerHTML = `
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-rose-700 dark:text-rose-400">${feature}</span>
-              <span class="text-[10px] font-mono font-black text-rose-600 bg-rose-100/40 dark:bg-rose-950/50 px-2 py-0.5 rounded-md">${val.toFixed(2)}</span>
+              <span class="text-[10px] font-bold text-rose-600 bg-rose-100/40 dark:bg-rose-950/50 px-2.5 py-0.5 rounded-md">Risk</span>
             </div>
             <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${descObj.negative}</p>
           `;
@@ -1612,20 +1552,20 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
       }
 
-      // 5. ACTIONABLE IMPROVEMENTS
+      // 4. STRATEGIC RECOMMENDATIONS (clean and concise, no metrics/long explanations)
       const improvementsListEl = document.getElementById("advisor-improvements-list");
       if (improvementsListEl) improvementsListEl.innerHTML = "";
 
       const improvements: string[] = [];
 
-      // Check ad presence and impact
-      if (lastPredictionData.ads === "Yes" && shapDict["Ad Presence"] < 0) {
+      // Check ad presence
+      if (lastPredictionData.ads === "Yes") {
         improvements.push(`
           <div class="flex items-start space-x-3 p-3 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30">
             <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xs mt-0.5">01</span>
             <div>
-              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Ad Presence Optimization</h4>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Ads are currently lowering your score by <strong>${Math.abs(shapDict["Ad Presence"]).toFixed(2)}</strong> points. Consider introducing a premium ad-free subscription or reducing interstitial frequency. The category average rating is <strong>${catAvg.toFixed(2)}</strong>, and ad-free competitors in this category show a 0.20 rating advantage.</p>
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Ad Experience Optimization</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Consider introducing an ad-free premium tier or optimizing interstitial ad frequency to enhance overall user satisfaction.</p>
             </div>
           </div>
         `);
@@ -1633,13 +1573,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Check update recency
       const updatesDays = lastPredictionData.updates || 30;
-      if (updatesDays > 45 && shapDict["Update Recency"] < 0) {
+      if (updatesDays > 45) {
         improvements.push(`
           <div class="flex items-start space-x-3 p-3 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30">
             <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xs mt-0.5">${improvements.length + 1}</span>
             <div>
               <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Accelerate Release Schedule</h4>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Your update frequency of <strong>${updatesDays} days</strong> is dragging your rating down by <strong>${Math.abs(shapDict["Update Recency"]).toFixed(2)}</strong> points. Release updates every 14 days or less to address bug fixes. Competitors in <strong>${category.replace(/_/g, " ")}</strong> with bi-weekly updates enjoy a stronger score retention.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Establish a more frequent update schedule to deliver bug fixes and address user feedback more rapidly.</p>
             </div>
           </div>
         `);
@@ -1647,13 +1587,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Check package size
       const appSize = lastPredictionData.size || 25;
-      if (appSize > 50 && shapDict["Package Size"] < 0) {
+      if (appSize > 50) {
         improvements.push(`
           <div class="flex items-start space-x-3 p-3 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30">
             <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xs mt-0.5">${improvements.length + 1}</span>
             <div>
               <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Reduce Package Overhead</h4>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">At <strong>${appSize}MB</strong>, your binary footprint reduces your rating by <strong>${Math.abs(shapDict["Package Size"]).toFixed(2)}</strong> points. Compress visual assets, employ code-splitting, or utilize dynamic resources delivery to bring the size under 20MB. Smaller sizes see a significant increase in day-1 retention and rating metrics in this category.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Compress assets and utilize code-splitting to reduce binary footprint, which improves install completion rates.</p>
             </div>
           </div>
         `);
@@ -1661,26 +1601,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Check engagement
       const appRatio = lastPredictionData.installs > 0 ? lastPredictionData.reviews / lastPredictionData.installs : 0;
-      if (appRatio < 0.02 && shapDict["Engagement Ratio"] < 0) {
+      if (appRatio < 0.02) {
         improvements.push(`
           <div class="flex items-start space-x-3 p-3 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30">
             <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xs mt-0.5">${improvements.length + 1}</span>
             <div>
               <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Boost Review Capture</h4>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Your reviews-to-installs ratio of <strong>${(appRatio * 100).toFixed(2)}%</strong> is penalizing your predicted rating by <strong>${Math.abs(shapDict["Engagement Ratio"]).toFixed(2)}</strong> points. Implement targeted in-app review prompts (e.g., using standard popups) exactly when the user achieves a positive action. This increases high-quality review volume and elevates average ratings.</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Implement timely in-app review prompts during positive user milestones to drive authentic organic ratings.</p>
             </div>
           </div>
         `);
       }
 
-      // Add a category specific improvement if the list is empty or short
+      // Default or category specific fallback recommendation if the list is empty or short
       if (improvements.length < 2) {
         improvements.push(`
           <div class="flex items-start space-x-3 p-3 bg-indigo-50/40 dark:bg-indigo-950/20 rounded-xl border border-indigo-100/50 dark:border-indigo-900/30">
             <span class="text-indigo-600 dark:text-indigo-400 font-bold text-xs mt-0.5">${improvements.length + 1}</span>
             <div>
-              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Category Specific Polish</h4>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Since your overall parameters are solid, focus on localized premium polish. Continuous optimization of user onboarding flows for <strong>${category.replace(/_/g, " ")}</strong> apps can yield up to a <strong>+0.15</strong> rating uplift, cementing your above-average standing.</p>
+              <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Continuous Premium Polish</h4>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Refine and optimize onboarding flows to minimize churn and ensure high retention from early-stage users.</p>
             </div>
           </div>
         `);
@@ -1872,37 +1812,184 @@ document.addEventListener("DOMContentLoaded", () => {
     edaRefreshBtn.addEventListener("click", updateEdaInsightsView);
   }
 
-  // Visual EDA Dashboard Implementation (Section 1-5)
+  // Visual EDA Dashboard Implementation (Section 1-5) with Dynamic Filters
+  let edaRawApps: any[] = [];
+  let edaFiltersInitialized = false;
+
+  function pearsonCorr(x: number[], y: number[]): number {
+    const n = x.length;
+    if (n === 0) return 0;
+    const meanX = x.reduce((s, v) => s + v, 0) / n;
+    const meanY = y.reduce((s, v) => s + v, 0) / n;
+    let num = 0;
+    let denX = 0;
+    let denY = 0;
+    for (let i = 0; i < n; i++) {
+      const dx = x[i] - meanX;
+      const dy = y[i] - meanY;
+      num += dx * dy;
+      denX += dx * dx;
+      denY += dy * dy;
+    }
+    if (denX === 0 || denY === 0) return 0;
+    return num / Math.sqrt(denX * denY);
+  }
+
   async function updateEdaDashboardView() {
     const loadingState = document.getElementById("eda-dash-loading-state");
     const contentContainer = document.getElementById("eda-dash-content");
 
-    if (loadingState) loadingState.classList.remove("hidden");
-    if (contentContainer) contentContainer.classList.add("hidden");
+    // Only show loading if we don't have cached raw apps yet
+    if (edaRawApps.length === 0) {
+      if (loadingState) loadingState.classList.remove("hidden");
+      if (contentContainer) contentContainer.classList.add("hidden");
+    }
 
     try {
-      const response = await fetch("/api/eda-dashboard-data");
-      if (!response.ok) throw new Error("Failed to fetch EDA dashboard data");
-      const data = await response.json();
+      if (edaRawApps.length === 0) {
+        const response = await fetch("/api/eda-dashboard-data");
+        if (!response.ok) throw new Error("Failed to fetch EDA dashboard data");
+        const data = await response.json();
+        if (data.rawApps) {
+          edaRawApps = data.rawApps;
+        } else {
+          // Fallback if rawApps not populated
+          edaRawApps = data.scatterPoints || [];
+        }
+      }
 
-      // Section 1: KPIs
-      const dashKpiApps = document.getElementById("dash-kpi-apps");
-      const dashKpiCategories = document.getElementById("dash-kpi-categories");
-      const dashKpiRating = document.getElementById("dash-kpi-rating");
-      const dashKpiReviews = document.getElementById("dash-kpi-reviews");
-      const dashKpiInstalls = document.getElementById("dash-kpi-installs");
+      // Initialize filter event listeners and options once
+      if (!edaFiltersInitialized) {
+        edaFiltersInitialized = true;
 
-      if (dashKpiApps) dashKpiApps.textContent = data.kpis.totalApps.toLocaleString();
-      if (dashKpiCategories) dashKpiCategories.textContent = data.kpis.categories.toLocaleString();
-      if (dashKpiRating) dashKpiRating.textContent = data.kpis.avgRating.toFixed(2);
-      if (dashKpiReviews) dashKpiReviews.textContent = data.kpis.totalReviews.toLocaleString();
-      if (dashKpiInstalls) dashKpiInstalls.textContent = data.kpis.totalInstalls.toLocaleString();
+        const categorySelect = document.getElementById("eda-filter-category") as HTMLSelectElement;
+        if (categorySelect) {
+          categorySelect.innerHTML = '<option value="ALL">All Categories</option>';
+          const uniqueCategories = Array.from(new Set(edaRawApps.map(app => app.category))).sort();
+          uniqueCategories.forEach(cat => {
+            const option = document.createElement("option");
+            option.value = cat;
+            option.textContent = cat.replace(/_/g, " ").toLowerCase();
+            categorySelect.appendChild(option);
+          });
+        }
 
-      // Section 2: Rating Distribution Histogram
-      const histContainer = document.getElementById("dash-hist-container");
-      if (histContainer) {
-        histContainer.innerHTML = "";
-        
+        // Bind filter change events
+        const filters = ["eda-filter-category", "eda-filter-price", "eda-filter-size"];
+        filters.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener("change", applyEdaFilters);
+          }
+        });
+
+        // Reset button
+        const resetBtn = document.getElementById("eda-filter-reset");
+        if (resetBtn) {
+          resetBtn.addEventListener("click", () => {
+            const catSel = document.getElementById("eda-filter-category") as HTMLSelectElement;
+            const priSel = document.getElementById("eda-filter-price") as HTMLSelectElement;
+            const sizSel = document.getElementById("eda-filter-size") as HTMLSelectElement;
+            if (catSel) catSel.value = "ALL";
+            if (priSel) priSel.value = "ALL";
+            if (sizSel) sizSel.value = "ALL";
+            applyEdaFilters();
+          });
+        }
+      }
+
+      // Apply initial filters
+      applyEdaFilters();
+
+      if (loadingState) loadingState.classList.add("hidden");
+      if (contentContainer) contentContainer.classList.remove("hidden");
+
+    } catch (err) {
+      console.error(err);
+      if (loadingState) loadingState.classList.add("hidden");
+    }
+  }
+
+  function applyEdaFilters() {
+    const catSelect = document.getElementById("eda-filter-category") as HTMLSelectElement;
+    const priceSelect = document.getElementById("eda-filter-price") as HTMLSelectElement;
+    const sizeSelect = document.getElementById("eda-filter-size") as HTMLSelectElement;
+
+    const catVal = catSelect ? catSelect.value : "ALL";
+    const priceVal = priceSelect ? priceSelect.value : "ALL";
+    const sizeVal = sizeSelect ? sizeSelect.value : "ALL";
+
+    let filtered = edaRawApps;
+
+    // 1. Category Filter
+    if (catVal !== "ALL") {
+      filtered = filtered.filter(app => app.category === catVal);
+    }
+
+    // 2. Price Filter
+    if (priceVal === "FREE") {
+      filtered = filtered.filter(app => app.price === 0 || app.appType === "Free");
+    } else if (priceVal === "PAID") {
+      filtered = filtered.filter(app => app.price > 0 || app.appType === "Paid");
+    }
+
+    // 3. Size Filter
+    if (sizeVal === "SMALL") {
+      filtered = filtered.filter(app => app.size <= 10);
+    } else if (sizeVal === "MEDIUM") {
+      filtered = filtered.filter(app => app.size > 10 && app.size <= 50);
+    } else if (sizeVal === "LARGE") {
+      filtered = filtered.filter(app => app.size > 50);
+    }
+
+    const matchedCountEl = document.getElementById("eda-filter-count");
+    if (matchedCountEl) {
+      matchedCountEl.textContent = `${filtered.length.toLocaleString()} apps matched`;
+    }
+
+    const totalApps = filtered.length;
+    const uniqueCats = Array.from(new Set(filtered.map(a => a.category)));
+    const totalCategories = uniqueCats.length;
+    const avgRating = totalApps > 0 ? filtered.reduce((sum, a) => sum + a.rating, 0) / totalApps : 0;
+    const totalReviews = filtered.reduce((sum, a) => sum + a.reviews, 0);
+    const totalInstalls = filtered.reduce((sum, a) => sum + a.installs, 0);
+
+    // Section 1: KPIs
+    const dashKpiApps = document.getElementById("dash-kpi-apps");
+    const dashKpiCategories = document.getElementById("dash-kpi-categories");
+    const dashKpiRating = document.getElementById("dash-kpi-rating");
+    const dashKpiReviews = document.getElementById("dash-kpi-reviews");
+    const dashKpiInstalls = document.getElementById("dash-kpi-installs");
+
+    if (dashKpiApps) dashKpiApps.textContent = totalApps.toLocaleString();
+    if (dashKpiCategories) dashKpiCategories.textContent = totalCategories.toLocaleString();
+    if (dashKpiRating) dashKpiRating.textContent = totalApps > 0 ? avgRating.toFixed(2) : "-";
+    if (dashKpiReviews) dashKpiReviews.textContent = totalReviews.toLocaleString();
+    if (dashKpiInstalls) dashKpiInstalls.textContent = totalInstalls.toLocaleString();
+
+    // Section 2: Rating Distribution Histogram
+    const histContainer = document.getElementById("dash-hist-container");
+    if (histContainer) {
+      histContainer.innerHTML = "";
+      if (totalApps === 0) {
+        histContainer.innerHTML = `<span class="text-xs text-slate-400 dark:text-slate-500">No data matches these criteria</span>`;
+      } else {
+        const bins = [
+          { label: "1.0 - 1.8", count: 0 },
+          { label: "1.8 - 2.6", count: 0 },
+          { label: "2.6 - 3.4", count: 0 },
+          { label: "3.4 - 4.2", count: 0 },
+          { label: "4.2 - 5.0", count: 0 }
+        ];
+        filtered.forEach(app => {
+          const r = app.rating;
+          if (r >= 1.0 && r < 1.8) bins[0].count++;
+          else if (r >= 1.8 && r < 2.6) bins[1].count++;
+          else if (r >= 2.6 && r < 3.4) bins[2].count++;
+          else if (r >= 3.4 && r < 4.2) bins[3].count++;
+          else if (r >= 4.2 && r <= 5.0) bins[4].count++;
+        });
+
         const rect = histContainer.getBoundingClientRect();
         const width = rect.width || 450;
         const height = rect.height || 180;
@@ -1911,15 +1998,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const innerWidth = width - padding.left - padding.right;
         const innerHeight = height - padding.top - padding.bottom;
         
-        const histData = data.ratingDistribution;
-        const maxCount = Math.max(...histData.map((d: any) => d.count), 1);
+        const maxCount = Math.max(...bins.map(d => d.count), 1);
         
-        const getX = (index: number) => padding.left + (index / histData.length) * innerWidth;
+        const getX = (index: number) => padding.left + (index / bins.length) * innerWidth;
         const getY = (count: number) => height - padding.bottom - (count / maxCount) * innerHeight;
         
         let svgContent = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" class="overflow-visible font-sans text-slate-700 dark:text-slate-300">`;
         
-        // Grids and Y-Axis Ticks
         const tickCount = 4;
         for (let i = 0; i <= tickCount; i++) {
           const val = Math.round((i / tickCount) * maxCount);
@@ -1930,15 +2015,13 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
         }
         
-        // X-Axis Baseline
         svgContent += `
           <line x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}" stroke="currentColor" class="text-slate-200 dark:text-slate-800" stroke-width="1.5" />
         `;
         
-        // Render bars
-        const barWidth = (innerWidth / histData.length) * 0.85;
-        histData.forEach((d: any, idx: number) => {
-          const bx = getX(idx) + (innerWidth / histData.length - barWidth) / 2;
+        const barWidth = (innerWidth / bins.length) * 0.85;
+        bins.forEach((d, idx) => {
+          const bx = getX(idx) + (innerWidth / bins.length - barWidth) / 2;
           const by = getY(d.count);
           const barHeight = height - padding.bottom - by;
           
@@ -1949,9 +2032,7 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
         });
         
-        // Mean marker
-        const meanRating = data.kpis.avgRating;
-        const meanFraction = (meanRating - 1.0) / (5.0 - 1.0);
+        const meanFraction = (avgRating - 1.0) / (5.0 - 1.0);
         const meanX = padding.left + meanFraction * innerWidth;
         
         svgContent += `
@@ -1960,17 +2041,105 @@ document.addEventListener("DOMContentLoaded", () => {
           
           <!-- Mean Badge -->
           <rect x="${meanX - 25}" y="${padding.top - 18}" width="50" height="15" rx="4" class="fill-indigo-600 dark:fill-indigo-500" />
-          <text x="${meanX}" y="${padding.top - 8}" text-anchor="middle" class="text-[8px] font-extrabold fill-white">μ = ${meanRating.toFixed(2)}</text>
+          <text x="${meanX}" y="${padding.top - 8}" text-anchor="middle" class="text-[8px] font-extrabold fill-white">μ = ${avgRating.toFixed(2)}</text>
         `;
         
         svgContent += `</svg>`;
         histContainer.innerHTML = svgContent;
       }
+    }
 
-      // Section 3: Category Analysis Horizontal Bar
-      const barContainer = document.getElementById("dash-bar-container");
-      if (barContainer) {
-        barContainer.innerHTML = data.categoryAnalysis.map((cat: any, idx: number) => {
+    // Monetization Mix: Free vs Paid donut chart
+    const freePaidContainer = document.getElementById("dash-free-paid-container");
+    if (freePaidContainer) {
+      freePaidContainer.innerHTML = "";
+      if (totalApps === 0) {
+        freePaidContainer.innerHTML = `<div class="h-32 w-full flex items-center justify-center text-xs text-slate-400 dark:text-slate-500">No data available</div>`;
+      } else {
+        let free = 0;
+        let paid = 0;
+        filtered.forEach(app => {
+          if (app.price === 0 || app.appType === "Free") {
+            free++;
+          } else {
+            paid++;
+          }
+        });
+        const total = free + paid || 1;
+        const freePct = (free / total) * 100;
+        const paidPct = (paid / total) * 100;
+        
+        const circ = 2 * Math.PI * 40; // ~251.3
+        const freeOffset = 0;
+        const paidOffset = - (freePct / 100) * circ;
+        
+        freePaidContainer.innerHTML = `
+          <div class="flex flex-col md:flex-row items-center justify-around gap-6 py-2">
+            <div class="relative w-32 h-32 flex items-center justify-center shrink-0">
+              <svg width="100%" height="100%" viewBox="0 0 100 100" class="-rotate-90">
+                <circle cx="50" cy="50" r="40" fill="none" class="stroke-slate-100 dark:stroke-slate-800" stroke-width="12" />
+                <circle cx="50" cy="50" r="40" fill="none" class="stroke-indigo-500 dark:stroke-indigo-400" stroke-width="12"
+                  stroke-dasharray="${circ}" stroke-dashoffset="${freeOffset}" />
+                <circle cx="50" cy="50" r="40" fill="none" class="stroke-emerald-500 dark:stroke-emerald-400" stroke-width="12"
+                  stroke-dasharray="${circ}" stroke-dashoffset="${paidOffset}" />
+              </svg>
+              <div class="absolute flex flex-col items-center justify-center text-center">
+                <span class="text-base font-black text-slate-800 dark:text-white leading-none">${total}</span>
+                <span class="text-[8px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider mt-0.5">Total Apps</span>
+              </div>
+            </div>
+            <div class="space-y-3 w-full max-w-xs">
+              <div class="flex items-center justify-between border-b border-slate-50 dark:border-slate-800/40 pb-1.5">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 dark:bg-indigo-400"></span>
+                  <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Free Apps</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-800 dark:text-white">${free.toLocaleString()}</span>
+                  <span class="text-[10px] text-slate-400 dark:text-slate-500 ml-1">(${freePct.toFixed(1)}%)</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400"></span>
+                  <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Paid Apps</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-xs font-bold text-slate-800 dark:text-white">${paid.toLocaleString()}</span>
+                  <span class="text-[10px] text-slate-400 dark:text-slate-500 ml-1">(${paidPct.toFixed(1)}%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Category Calculations
+    const catMap: Record<string, { sumRating: number, count: number }> = {};
+    filtered.forEach(app => {
+      const cat = app.category;
+      if (!catMap[cat]) {
+        catMap[cat] = { sumRating: 0, count: 0 };
+      }
+      catMap[cat].sumRating += app.rating;
+      catMap[cat].count += 1;
+    });
+
+    const categoryAnalysis = Object.entries(catMap).map(([category, d]) => ({
+      category: category.replace(/_/g, " "),
+      avgRating: d.count > 0 ? Number((d.sumRating / d.count).toFixed(2)) : 4.0,
+      count: d.count
+    })).sort((a, b) => b.avgRating - a.avgRating);
+
+    // Category-wise Average Rating
+    const barContainer = document.getElementById("dash-bar-container");
+    if (barContainer) {
+      barContainer.innerHTML = "";
+      if (categoryAnalysis.length === 0) {
+        barContainer.innerHTML = `<div class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No data matches filters</div>`;
+      } else {
+        barContainer.innerHTML = categoryAnalysis.map((cat: any, idx: number) => {
           const pct = (cat.avgRating / 5.0) * 100;
           return `
             <div class="space-y-1">
@@ -1985,71 +2154,127 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
         }).join("");
       }
+    }
 
-      // Section 4: Relationships Scatter plots
-      renderScatter("dash-scatter-reviews", data.scatterPoints, "reviews", "Reviews");
-      renderScatter("dash-scatter-installs", data.scatterPoints, "installs", "Installs");
-
-      // Bind Scatter dots tooltips
-      const tooltip = document.getElementById("scatter-tooltip");
-      if (tooltip) {
-        document.querySelectorAll(".scatter-dot").forEach(dot => {
-          dot.addEventListener("mouseenter", (e: any) => {
-            const d = e.target;
-            const name = d.getAttribute("data-name");
-            const cat = d.getAttribute("data-category");
-            const rating = d.getAttribute("data-rating");
-            const yval = d.getAttribute("data-yval");
-            const ylabel = d.getAttribute("data-ylabel");
-            
-            tooltip.innerHTML = `
-              <span class="text-indigo-400 dark:text-indigo-300 font-bold">${name}</span>
-              <span class="text-[9px] text-slate-400">${cat}</span>
-              <div class="border-t border-slate-700/50 mt-1 pt-1 flex flex-col space-y-0.5 text-slate-300">
-                <span>Rating: <strong class="text-white">${rating}</strong></span>
-                <span>${ylabel}: <strong class="text-white">${yval}</strong></span>
+    // Category-wise App Count
+    const catCountContainer = document.getElementById("dash-category-count-container");
+    if (catCountContainer) {
+      catCountContainer.innerHTML = "";
+      if (categoryAnalysis.length === 0) {
+        catCountContainer.innerHTML = `<div class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No data matches filters</div>`;
+      } else {
+        const sortedByCount = [...categoryAnalysis].sort((a, b) => b.count - a.count);
+        const maxCount = Math.max(...sortedByCount.map((cat: any) => cat.count), 1);
+        catCountContainer.innerHTML = sortedByCount.map((cat: any, idx: number) => {
+          const pct = (cat.count / maxCount) * 100;
+          return `
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs font-semibold">
+                <span class="text-slate-700 dark:text-slate-300 capitalize text-[11px]">${idx + 1}. ${cat.category.toLowerCase()}</span>
+                <span class="text-emerald-600 dark:text-emerald-400 text-[11px] font-bold">${cat.count} Apps</span>
               </div>
-            `;
-            
-            tooltip.classList.remove("hidden");
-            
-            const rect = d.getBoundingClientRect();
-            const parentRect = document.body.getBoundingClientRect();
-            tooltip.style.left = `${rect.left - parentRect.left + 12}px`;
-            tooltip.style.top = `${rect.top - parentRect.top - 12}px`;
-          });
-          
-          dot.addEventListener("mouseleave", () => {
-            tooltip.classList.add("hidden");
-          });
-        });
+              <div class="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-500 rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join("");
       }
+    }
 
-      // Section 5: Correlation Heatmap
-      const heatmapContainer = document.getElementById("dash-heatmap-container");
-      if (heatmapContainer) {
-        heatmapContainer.innerHTML = "";
+    // Relationships Scatter plots with live sampling
+    const maxScatterPoints = 250;
+    const step = Math.max(1, Math.floor(filtered.length / maxScatterPoints));
+    const scatterPoints = filtered.filter((_, idx) => idx % step === 0).map(a => ({
+      name: a.name,
+      rating: a.rating,
+      reviews: a.reviews,
+      installs: a.installs,
+      category: a.category.replace(/_/g, " ")
+    }));
+
+    renderScatter("dash-scatter-reviews", scatterPoints, "reviews", "Reviews");
+    renderScatter("dash-scatter-installs", scatterPoints, "installs", "Installs");
+
+    // Bind Scatter dots tooltips
+    const tooltip = document.getElementById("scatter-tooltip");
+    if (tooltip) {
+      document.querySelectorAll(".scatter-dot").forEach(dot => {
+        dot.addEventListener("mouseenter", (e: any) => {
+          const d = e.target;
+          const name = d.getAttribute("data-name");
+          const cat = d.getAttribute("data-category");
+          const rating = d.getAttribute("data-rating");
+          const yval = d.getAttribute("data-yval");
+          const ylabel = d.getAttribute("data-ylabel");
+          
+          tooltip.innerHTML = `
+            <span class="text-indigo-400 dark:text-indigo-300 font-bold">${name}</span>
+            <span class="text-[9px] text-slate-400">${cat}</span>
+            <div class="border-t border-slate-700/50 mt-1 pt-1 flex flex-col space-y-0.5 text-slate-300">
+              <span>Rating: <strong class="text-white">${rating}</strong></span>
+              <span>${ylabel}: <strong class="text-white">${yval}</strong></span>
+            </div>
+          `;
+          
+          tooltip.classList.remove("hidden");
+          
+          const rect = d.getBoundingClientRect();
+          const parentRect = document.body.getBoundingClientRect();
+          tooltip.style.left = `${rect.left - parentRect.left + 12}px`;
+          tooltip.style.top = `${rect.top - parentRect.top - 12}px`;
+        });
         
-        const labels = data.labels;
-        const matrix = data.correlationMatrix;
-        
+        dot.addEventListener("mouseleave", () => {
+          tooltip.classList.add("hidden");
+        });
+      });
+    }
+
+    // Feature Correlation Heatmap dynamically calculated
+    const heatmapContainer = document.getElementById("dash-heatmap-container");
+    if (heatmapContainer) {
+      heatmapContainer.innerHTML = "";
+      if (totalApps === 0) {
+        heatmapContainer.innerHTML = `<div class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">No data matches filters</div>`;
+      } else {
+        const heatmapLabels = ["Rating", "Reviews", "Installs", "Size", "Price", "Update Days"];
+        const features = [
+          filtered.map(a => a.rating),
+          filtered.map(a => a.reviews),
+          filtered.map(a => a.installs),
+          filtered.map(a => a.size),
+          filtered.map(a => a.price),
+          filtered.map(a => a.lastUpdatedDays)
+        ];
+
+        const correlationMatrix: any[] = [];
+        for (let i = 0; i < heatmapLabels.length; i++) {
+          for (let j = 0; j < heatmapLabels.length; j++) {
+            const coef = pearsonCorr(features[i], features[j]);
+            correlationMatrix.push({
+              x: heatmapLabels[i],
+              y: heatmapLabels[j],
+              value: Number(coef.toFixed(2))
+            });
+          }
+        }
+
         let html = `
           <div class="grid grid-cols-7 gap-1 md:gap-1.5 text-center font-sans">
-            <!-- Top Header corner cell -->
             <div></div>
-            <!-- Top headers -->
-            ${labels.map((l: string) => `
+            ${heatmapLabels.map((l: string) => `
               <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight py-1 select-none flex items-center justify-center break-all text-center leading-tight">${l}</div>
             `).join("")}
         `;
-        
-        labels.forEach((rowLabel: string) => {
+
+        heatmapLabels.forEach((rowLabel: string) => {
           html += `
             <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight pr-1 flex items-center justify-end select-none break-all text-right leading-tight">${rowLabel}</div>
           `;
           
-          labels.forEach((colLabel: string) => {
-            const cell = matrix.find((m: any) => m.x === colLabel && m.y === rowLabel);
+          heatmapLabels.forEach((colLabel: string) => {
+            const cell = correlationMatrix.find((m: any) => m.x === colLabel && m.y === rowLabel);
             const val = cell ? cell.value : 0;
             
             let bgClass = "";
@@ -2096,17 +2321,10 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
           });
         });
-        
+
         html += `</div>`;
         heatmapContainer.innerHTML = html;
       }
-
-      if (loadingState) loadingState.classList.add("hidden");
-      if (contentContainer) contentContainer.classList.remove("hidden");
-
-    } catch (err) {
-      console.error(err);
-      if (loadingState) loadingState.classList.add("hidden");
     }
   }
 
@@ -2125,7 +2343,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const minX = 1.0;
     const maxX = 5.0;
     
-    const maxY = Math.max(...points.map((p: any) => p[yKey]), 1);
+    const maxY = points.reduce((max, p) => p[yKey] > max ? p[yKey] : max, 1);
     const minY = 0;
     
     const getX = (x: number) => padding.left + ((x - minX) / (maxX - minX)) * (width - padding.left - padding.right);
@@ -2190,7 +2408,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Bind EDA Dashboard Refresh Button
   const edaDashRefreshBtn = document.getElementById("eda-dash-refresh-btn");
   if (edaDashRefreshBtn) {
-    edaDashRefreshBtn.addEventListener("click", updateEdaDashboardView);
+    edaDashRefreshBtn.addEventListener("click", () => {
+      edaRawApps = [];
+      updateEdaDashboardView();
+    });
   }
 
   // ==========================================
@@ -2765,7 +2986,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "page-trend": "Trend Analysis",
         "page-advisor": "AI Advisor Solutions",
         "page-eda-insights": "Market EDA Insights",
-        "page-eda-dashboard": "EDA Empirical Dashboard",
+        "page-eda-dashboard": "EDA Interactive Dashboard",
         "page-history": "Diagnostic History",
         "page-about": "System Information",
         "page-signup": "Create Account",
@@ -3372,7 +3593,7 @@ document.addEventListener("DOMContentLoaded", () => {
       { type: "screen", label: "Market Trend Comparison", id: "page-trend" },
       { type: "screen", label: "AI Advisor Expert", id: "page-advisor" },
       { type: "screen", label: "Market EDA Insights", id: "page-eda-insights" },
-      { type: "screen", label: "EDA Empirical Dashboard", id: "page-eda-dashboard" },
+      { type: "screen", label: "EDA Interactive Dashboard", id: "page-eda-dashboard" },
       { type: "screen", label: "Diagnostic History", id: "page-history" },
       { type: "screen", label: "System Information (About)", id: "page-about" },
       { type: "category", label: "Game Segment Insights", id: "page-eda-insights", term: "GAME" },

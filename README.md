@@ -54,12 +54,14 @@ RateIQ is an AI-powered app rating prediction and diagnostic platform that analy
 
 ---
 
-## 6. Model 
- 
-| Linear Regression | 
-| Random Forest | 
-| XGBoost | 
-| LightGBM | 
+## 6. Model Comparison
+
+| Model | MAE | RMSE | R² |
+| :--- | :---: | :---: | :---: |
+| Linear Regression | - | - | - |
+| Random Forest | - | - | - |
+| XGBoost | - | - | - |
+| LightGBM | - | - | - |
 
 ---
 
@@ -72,7 +74,7 @@ RateIQ is an AI-powered app rating prediction and diagnostic platform that analy
 ## 8. Technical Architecture
 * **Frontend UI**: Streamlit
 * **Backend API**: FastAPI
-* **Machine Learning**: LightGBM
+* **Machine Learning**: Scikit-learn / LightGBM
 * **Explainability Engine**: SHAP
 * **Visualization Layer**: Plotly
 * **Containerization**: Docker & Docker Compose

@@ -607,47 +607,6 @@
                   <p id="competitor-insight-text" class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium">Your predicted rating is superior to the benchmark average in this category.</p>
                 </div>
 
-                <!-- Metrics Comparison Grid -->
-                <div class="grid grid-cols-3 gap-3">
-                  <!-- Metric 1: Rating Benchmarking -->
-                  <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-150 dark:border-slate-800/60 rounded-xl p-3 text-center">
-                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Rank Position</span>
-                    <span id="competitor-rank-val" class="text-sm font-black text-indigo-600 dark:text-indigo-400 block">Top 20%</span>
-                    <span class="text-[9px] font-medium text-slate-500 dark:text-slate-400 block mt-0.5">Category Rating</span>
-                  </div>
-                  <!-- Metric 2: Category Average Rating -->
-                  <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-150 dark:border-slate-800/60 rounded-xl p-3 text-center">
-                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Category Avg</span>
-                    <span id="competitor-avg-rating-val" class="text-sm font-black text-slate-800 dark:text-white block">4.2</span>
-                    <span class="text-[9px] font-medium text-slate-500 dark:text-slate-400 block mt-0.5">Rating Index</span>
-                  </div>
-                  <!-- Metric 3: Install Tier Comparison -->
-                  <div class="bg-slate-50 dark:bg-slate-950/60 border border-slate-150 dark:border-slate-800/60 rounded-xl p-3 text-center">
-                    <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Install Tier</span>
-                    <span id="competitor-install-tier" class="text-sm font-black text-emerald-600 dark:text-emerald-400 block">High Volume</span>
-                    <span class="text-[9px] font-medium text-slate-500 dark:text-slate-400 block mt-0.5">Vs Category</span>
-                  </div>
-                </div>
-
-                <!-- Install Distribution Section -->
-                <div class="space-y-3 pt-1">
-                  <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Install Distribution</h4>
-                  <div class="grid grid-cols-3 gap-2 text-center bg-slate-50/50 dark:bg-slate-950/20 border border-slate-200/50 dark:border-slate-800/50 rounded-xl p-3">
-                    <div>
-                      <span class="block text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Min Installs</span>
-                      <span id="competitor-install-min" class="text-xs font-bold text-slate-700 dark:text-slate-300">10K</span>
-                    </div>
-                    <div class="border-x border-slate-200/50 dark:border-slate-800/50">
-                      <span class="block text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Average Installs</span>
-                      <span id="competitor-install-avg" class="text-xs font-bold text-indigo-600 dark:text-indigo-400">500K</span>
-                    </div>
-                    <div>
-                      <span class="block text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Max Installs</span>
-                      <span id="competitor-install-max" class="text-xs font-bold text-slate-700 dark:text-slate-300">10M</span>
-                    </div>
-                  </div>
-                </div>
-
                 <!-- Real Competitors List -->
                 <div class="space-y-2.5 pt-1">
                   <div class="flex items-center justify-between">
@@ -703,86 +662,85 @@
 
           <!-- Trend Content Container -->
           <div id="trend-content-container" class="hidden space-y-6">
-            <!-- App Position Summary Card -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-              <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">App Market Position</h3>
-                <span id="trend-category-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">Category</span>
+            <!-- Header status row -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <div class="space-y-1">
+                <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block font-sans">Analysis Domain</span>
+                <span id="trend-category-badge" class="text-base font-black text-slate-800 dark:text-white uppercase tracking-tight">Category</span>
               </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 text-center">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Predicted Rating</span>
-                  <span id="trend-predicted-val" class="text-2xl font-black text-indigo-600 dark:text-indigo-400 block">4.3</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 text-center">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Category Average</span>
-                  <span id="trend-average-val" class="text-2xl font-black text-slate-800 dark:text-white block">4.15</span>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 text-center flex flex-col justify-center items-center">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Difference</span>
-                  <div class="flex items-center space-x-1.5 mt-1">
-                    <span id="trend-diff-badge" class="text-xs font-bold px-2.5 py-1 rounded-full border">0.00</span>
-                    <span id="trend-position-label" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Near Average</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Position Explanation -->
-              <div class="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/60 rounded-xl p-4">
-                <p id="trend-position-desc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"></p>
+              <div class="flex items-center space-x-2">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Market Position:</span>
+                <span id="trend-position-label" class="text-xs font-black px-3.5 py-1.5 rounded-xl border">Inline</span>
               </div>
             </div>
 
-            <!-- Double Grid Cards for Rating & Growth -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <!-- Rating Trend -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category Rating Trend</h3>
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Average app quality score movement over the last 5 years.</p>
+            <!-- Bento Grid of Qualitative Insights -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- 1. Market Position Explanation -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
+                <div class="flex items-center space-x-2">
+                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                  </span>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Competitive Standing</h3>
                 </div>
-                <!-- SVG Container -->
-                <div id="chart-rating-trend" class="h-52 w-full flex items-center justify-center"></div>
-                <!-- Insight Box -->
-                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                  <span class="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block mb-1">Temporal Insight</span>
-                  <p id="trend-rating-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"></p>
-                </div>
+                <p id="trend-position-desc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
               </div>
 
-              <!-- Install Growth Trend -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Install Growth Trend</h3>
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Cumulative installation volume trend of category competitors.</p>
+              <!-- 2. Quality expectation evolution (Rating trend) -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
+                <div class="flex items-center space-x-2">
+                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </span>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Quality Trend Evolution</h3>
                 </div>
-                <!-- SVG Container -->
-                <div id="chart-install-trend" class="h-52 w-full flex items-center justify-center"></div>
-                <!-- Insight Box -->
-                <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                  <span class="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-1">Distribution Insight</span>
-                  <p id="trend-install-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed"></p>
-                </div>
+                <p id="trend-rating-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
               </div>
-            </div>
 
-            <!-- Update Frequency VS Rating -->
-            <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-              <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex justify-between items-center">
-                <div>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Update Frequency vs. Rating</h3>
-                  <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Core correlation between active update intervals and aggregate ratings.</p>
+              <!-- 3. Market expansion trend (Install trend) -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
+                <div class="flex items-center space-x-2">
+                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                  </span>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Market Expansion Scaling</h3>
                 </div>
+                <p id="trend-install-growth-desc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                  The overall category shows consistent and expanding install volumes over time, demonstrating broad market growth and continuing consumer interest.
+                </p>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                <!-- SVG Container -->
-                <div id="chart-frequency-trend" class="md:col-span-7 h-52 w-full flex items-center justify-center"></div>
-                <!-- Insight Box -->
-                <div class="md:col-span-5 bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 self-stretch flex flex-col justify-center">
-                  <span class="text-[9px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block mb-1.5">Optimization Guideline</span>
-                  <p id="trend-frequency-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
+
+              <!-- 4. Scaling insight (higher rated grow better) -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
+                <div class="flex items-center space-x-2">
+                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </span>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Sustained Growth Amplification</h3>
                 </div>
+                <p id="trend-install-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
+              </div>
+
+              <!-- 5. Update frequency impact -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3 md:col-span-2">
+                <div class="flex items-center space-x-2">
+                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.2 8H18.5" />
+                    </svg>
+                  </span>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Agile QA and Maintenance Advantage</h3>
+                </div>
+                <p id="trend-frequency-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
               </div>
             </div>
           </div>
@@ -859,37 +817,12 @@
                 </div>
               </div>
 
-              <!-- Row 2: Market Position -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Market Position & Percentile</h3>
-                  <span id="advisor-category-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">CATEGORY</span>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Category Average</span>
-                    <span id="advisor-cat-avg" class="text-xl font-black text-slate-700 dark:text-slate-300">4.15</span>
-                  </div>
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Predicted Rating Diff</span>
-                    <span id="advisor-rating-diff" class="text-xl font-black text-indigo-600 dark:text-indigo-400">+0.15</span>
-                  </div>
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Competitor Percentile</span>
-                    <span id="advisor-percentile-rank" class="text-xl font-black text-emerald-600 dark:text-emerald-400 font-sans">Top 15%</span>
-                  </div>
-                </div>
-                <p id="advisor-position-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed pt-2">
-                  <!-- Filled dynamically -->
-                </p>
-              </div>
-
               <!-- Row 3: Strengths & Risks (What impacts your rating) -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Strengths Card -->
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
                   <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Positive Factors (What improves your rating)</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Key Strengths</h3>
                     <svg class="h-5 w-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0" />
                     </svg>
@@ -902,7 +835,7 @@
                 <!-- Risks Card -->
                 <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
                   <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Negative Factors (What lowers your rating)</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">Risk Assessment</h3>
                     <svg class="h-5 w-5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
@@ -916,7 +849,7 @@
               <!-- Row 4: Strategic Recommendations -->
               <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
                 <div class="border-b border-slate-100 dark:border-slate-800 pb-3 flex items-center justify-between">
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Actionable Market Improvements</h3>
+                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Strategic Recommendation</h3>
                   <span class="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Targeted Strategy</span>
                 </div>
                 <div id="advisor-improvements-list" class="space-y-4">
@@ -935,7 +868,7 @@
               <div>
                 <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block font-sans">Empirical Discovery</span>
                 <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Market EDA Insights</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">Deep empirical analysis of reference storefront datasets to identify critical levers driving average store rating performance.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">Strategic analysis of reference patterns to identify critical levers driving average store rating performance.</p>
               </div>
               <button id="eda-refresh-btn" class="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 text-xs font-semibold rounded-xl hover:bg-indigo-100/50 dark:hover:bg-indigo-950/60 transition-all cursor-pointer flex items-center space-x-1.5 shrink-0">
                 <svg class="h-3 w-3 animate-spin-hover" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -948,251 +881,28 @@
             <!-- Loading State -->
             <div id="eda-loading-state" class="space-y-6 py-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs animate-pulse">
               <div class="h-4 w-1/3 bg-slate-200 dark:bg-slate-800 rounded mb-4"></div>
-              <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div class="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                <div class="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                <div class="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                <div class="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                <div class="h-20 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div class="h-40 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
-                <div class="h-40 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
-              </div>
-              <p class="text-[10px] text-center text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Computing statistical dataset models dynamically...</p>
+              <p class="text-[10px] text-center text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Computing statistical models dynamically...</p>
             </div>
 
             <!-- Content Container (hidden by default) -->
             <div id="eda-content" class="hidden space-y-8">
 
-              <!-- 1. DATASET OVERVIEW -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">1. Reference Dataset Overview</h3>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Apps Analyzed</span>
-                    <span id="eda-total-apps" class="text-xl font-black text-slate-800 dark:text-white">-</span>
-                  </div>
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Categories</span>
-                    <span id="eda-total-categories" class="text-xl font-black text-slate-800 dark:text-white">-</span>
-                  </div>
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Global Avg Rating</span>
-                    <span id="eda-avg-rating" class="text-xl font-black text-indigo-600 dark:text-indigo-400">-</span>
-                  </div>
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 col-span-1">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Avg Install Scale</span>
-                    <span id="eda-avg-installs" class="text-xl font-black text-slate-800 dark:text-white">-</span>
-                  </div>
-                  <div class="bg-slate-50 dark:bg-slate-950/40 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4 col-span-1">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Avg Reviews Count</span>
-                    <span id="eda-avg-reviews" class="text-xl font-black text-slate-800 dark:text-white">-</span>
-                  </div>
-                </div>
-                <p id="eda-dataset-description" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                  <!-- Filled dynamically -->
-                </p>
-              </div>
-
-              <!-- 8. KEY TAKEAWAYS -->
-              <div class="bg-indigo-50/40 dark:bg-indigo-950/10 border border-indigo-100 dark:border-indigo-900/30 rounded-2xl p-6 shadow-xs space-y-4">
-                <div class="flex items-center space-x-2">
-                  <svg class="h-4 w-4 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <!-- KEY TAKEAWAYS ONLY -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6">
+                <div class="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 font-sans">Core Strategic Takeaways</h3>
+                  <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 font-sans">Core Strategic Takeaways</h3>
                 </div>
                 <div id="eda-takeaways" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                   <!-- Filled dynamically -->
-                </div>
-              </div>
-
-              <!-- 2. RATING INSIGHTS & DISTRIBUTION -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">2. App Rating Distribution & Competitive Ceiling</h3>
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  <!-- Custom visual bars of distribution -->
-                  <div class="md:col-span-5 bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/80 rounded-xl p-5 space-y-3 flex flex-col justify-between">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Rating Distribution Matrix</span>
-                    <div id="eda-rating-bins" class="space-y-2">
-                      <!-- Progress bars filled dynamically -->
-                    </div>
-                  </div>
-                  <!-- Insights side -->
-                  <div class="md:col-span-7 flex flex-col justify-between space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                      <div class="border border-slate-100 dark:border-slate-800 rounded-xl p-4 text-center">
-                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">% Apps Above 4.0</span>
-                        <span id="eda-pct-above-four" class="text-lg font-black text-emerald-600 dark:text-emerald-400">-</span>
-                      </div>
-                      <div class="border border-slate-100 dark:border-slate-800 rounded-xl p-4 text-center">
-                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">% Apps Below 3.5</span>
-                        <span id="eda-pct-below-three-five" class="text-lg font-black text-rose-600 dark:text-rose-400">-</span>
-                      </div>
-                    </div>
-                    <p id="eda-rating-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                      <!-- Filled dynamically -->
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. CATEGORY PERFORMANCE -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">3. Category-Specific Benchmark Discrepancies</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <!-- Top 5 Categories -->
-                  <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center justify-between">
-                      <span>Highest Rated Categories</span>
-                      <svg class="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                      </svg>
-                    </h4>
-                    <div id="eda-top-categories" class="divide-y divide-slate-100 dark:divide-slate-800">
-                      <!-- List items loaded dynamically -->
-                    </div>
-                  </div>
-                  <!-- Lowest 5 Categories -->
-                  <div class="space-y-3">
-                    <h4 class="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest flex items-center justify-between">
-                      <span>Lowest Rated Categories</span>
-                      <svg class="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                      </svg>
-                    </h4>
-                    <div id="eda-bottom-categories" class="divide-y divide-slate-100 dark:divide-slate-800">
-                      <!-- List items loaded dynamically -->
-                    </div>
-                  </div>
-                </div>
-                <div class="bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/80 rounded-xl p-4">
-                  <p id="eda-category-explanation" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                    <!-- Filled dynamically -->
-                  </p>
-                </div>
-              </div>
-
-              <!-- 4. USER ENGAGEMENT, 5. UPDATE INSIGHTS, 6. ADS & PRICING -->
-              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- User Engagement -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
-                  <div class="space-y-2">
-                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">4. User Engagement Impact</h3>
-                    <div class="border-b border-slate-100 dark:border-slate-800/80 pb-2">
-                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Scale vs. Rating Expectations</h4>
-                    </div>
-                    <div class="space-y-2.5 pt-1">
-                      <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400">High Install Avg Rating</span>
-                        <span id="eda-high-installs-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400">Low Install Avg Rating</span>
-                        <span id="eda-low-installs-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400">High Reviews Avg Rating</span>
-                        <span id="eda-high-reviews-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400">Low Reviews Avg Rating</span>
-                        <span id="eda-low-reviews-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p id="eda-engagement-explanation" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <!-- Filled dynamically -->
-                  </p>
-                </div>
-
-                <!-- Update Insights -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
-                  <div class="space-y-2">
-                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">5. Update Recency Lever</h3>
-                    <div class="border-b border-slate-100 dark:border-slate-800/80 pb-2">
-                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Active Patch Cycles vs. Stagnation</h4>
-                    </div>
-                    <div class="space-y-2.5 pt-1">
-                      <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400 font-medium">Frequent Updates (≤45d)</span>
-                        <span id="eda-freq-updates-rating" class="font-bold text-emerald-600 dark:text-emerald-400">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400 font-medium">Rare Updates (>45d)</span>
-                        <span id="eda-rare-updates-rating" class="font-bold text-rose-600 dark:text-rose-400">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs font-medium">
-                        <span class="text-slate-500 dark:text-slate-400">Update Rating Correlation</span>
-                        <span id="eda-update-rating-corr" class="font-bold text-slate-700 dark:text-slate-300">-</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p id="eda-update-explanation" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <!-- Filled dynamically -->
-                  </p>
-                </div>
-
-                <!-- Ads & Pricing -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs flex flex-col justify-between space-y-4">
-                  <div class="space-y-2">
-                    <h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">6. Ads & Monetization Structure</h3>
-                    <div class="border-b border-slate-100 dark:border-slate-800/80 pb-2">
-                      <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Revenue Mechanics Impact</h4>
-                    </div>
-                    <div class="space-y-2.5 pt-1">
-                      <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400 font-medium">Ad-Free Rating (No Ads)</span>
-                        <span id="eda-no-ads-rating" class="font-bold text-emerald-600 dark:text-emerald-400">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs font-medium">
-                        <span class="text-slate-500 dark:text-slate-400">Ad-Supported Rating (Yes)</span>
-                        <span id="eda-ads-rating" class="font-bold text-rose-600 dark:text-rose-400">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs font-medium">
-                        <span class="text-slate-500 dark:text-slate-400">Paid Application Rating</span>
-                        <span id="eda-paid-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
-                      </div>
-                      <div class="flex justify-between items-center text-xs font-medium">
-                        <span class="text-slate-500 dark:text-slate-400">Free Application Rating</span>
-                        <span id="eda-free-rating" class="font-bold text-slate-700 dark:text-slate-300">-</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p id="eda-monetization-explanation" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed pt-2 border-t border-slate-100 dark:border-slate-800">
-                    <!-- Filled dynamically -->
-                  </p>
-                </div>
-              </div>
-
-              <!-- 7. FEATURE RELATIONSHIPS (CORRELATIONS) -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">7. Statistical Feature Relationships (Pearson Correlation Coefficients)</h3>
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                  <!-- Correlation Progress Bars -->
-                  <div class="lg:col-span-6 space-y-3 bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800/80 rounded-xl p-5">
-                    <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Linear Relationship Intensity with App Rating</span>
-                    <div id="eda-correlation-list" class="space-y-3">
-                      <!-- Progress bars filled dynamically -->
-                    </div>
-                  </div>
-                  <!-- Explanatory description -->
-                  <div class="lg:col-span-6 flex flex-col justify-between space-y-4">
-                    <div class="space-y-3">
-                      <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">How to Interpret Correlations</h4>
-                      <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                        <p><strong>Pearson Correlation Coefficient (r)</strong> ranges from <strong>-1.0 to +1.0</strong>. It quantifies the strength and direction of the linear relationship between application features and their predicted rating outcomes.</p>
-                        <p class="pl-3 border-l-2 border-emerald-500"><strong>Positive Coefficient (+r)</strong>: Indicates that as the attribute increases, the application rating tends to increase as well (e.g. higher review engagement ratios or active updates).</p>
-                        <p class="pl-3 border-l-2 border-rose-500"><strong>Negative Coefficient (-r)</strong>: Indicates that as the attribute increases, the rating tends to decrease (e.g. longer stagnation cycles, bloated file sizes, or aggressive ad modules).</p>
-                      </div>
-                    </div>
-                    <div class="bg-indigo-50/20 dark:bg-indigo-950/20 border border-indigo-100/40 dark:border-indigo-900/40 rounded-xl p-4">
-                      <p class="text-xs text-indigo-800 dark:text-indigo-300 leading-relaxed font-medium">
-                        <strong>Practical Interpretation</strong>: Features with values closer to <strong>+1.0</strong> or <strong>-1.0</strong> represent the strongest levers for your product strategy. Focus on maximizing positive attributes and strictly eliminating negative drag factors to maximize storefront standing.
-                      </p>
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -1205,9 +915,9 @@
             <!-- Page Hero Header (SaaS Standard) -->
             <div class="border-b border-slate-200/60 dark:border-slate-800/60 pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block font-sans">Empirical Discovery</span>
-                <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">EDA Empirical Dashboard</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">Interactive statistical and visual charts computed in real-time directly from our store reference database.</p>
+                <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block font-sans">Interactive Metrics</span>
+                <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Market EDA Dashboard</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">Interactive visualization of application characteristics, rating distributions, and feature correlations.</p>
               </div>
               <button id="eda-dash-refresh-btn" class="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 text-xs font-semibold rounded-xl hover:bg-indigo-100/50 dark:hover:bg-indigo-950/60 transition-all cursor-pointer flex items-center space-x-1.5 shrink-0">
                 <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -1219,114 +929,156 @@
 
             <!-- Loading State -->
             <div id="eda-dash-loading-state" class="space-y-6 py-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs animate-pulse">
-              <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
                 <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
                 <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
                 <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
               </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <div class="h-64 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
-                <div class="h-64 bg-slate-100 dark:bg-slate-800 rounded-2xl"></div>
-              </div>
-              <p class="text-[10px] text-center text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Rendering interactive charts from dataset models...</p>
+              <p class="text-[10px] text-center text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Analyzing strategic insights from dataset models...</p>
             </div>
 
             <!-- Dashboard Content Container (hidden by default) -->
             <div id="eda-dash-content" class="hidden space-y-6">
 
-              <!-- SECTION 1: KPIs (Single row) -->
-              <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Apps</span>
-                  <span id="dash-kpi-apps" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+              <!-- Top Filter Bar (Horizontal Layout) -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 grow">
+                  <!-- Category Dropdown -->
+                  <div class="space-y-1">
+                    <label for="eda-filter-category" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Genre / Category</label>
+                    <select id="eda-filter-category" class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors capitalize">
+                      <option value="ALL">All Categories</option>
+                    </select>
+                  </div>
+
+                  <!-- Price Dropdown -->
+                  <div class="space-y-1">
+                    <label for="eda-filter-price" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Price Model</label>
+                    <select id="eda-filter-price" class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors">
+                      <option value="ALL">All Price Models</option>
+                      <option value="FREE">Free</option>
+                      <option value="PAID">Paid</option>
+                    </select>
+                  </div>
+
+                  <!-- Size Dropdown -->
+                  <div class="space-y-1">
+                    <label for="eda-filter-size" class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">App Size</label>
+                    <select id="eda-filter-size" class="block w-full rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-3 py-2 text-xs focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500 focus:outline-hidden text-slate-900 dark:text-white transition-colors">
+                      <option value="ALL">All Sizes</option>
+                      <option value="SMALL">Small (≤ 10 MB)</option>
+                      <option value="MEDIUM">Medium (10 MB – 50 MB)</option>
+                      <option value="LARGE">Large (> 50 MB)</option>
+                    </select>
+                  </div>
                 </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Categories</span>
-                  <span id="dash-kpi-categories" class="text-xl font-black text-slate-800 dark:text-white">-</span>
-                </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Avg Rating</span>
-                  <span id="dash-kpi-rating" class="text-xl font-black text-indigo-600 dark:text-indigo-400">-</span>
-                </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Reviews</span>
-                  <span id="dash-kpi-reviews" class="text-xl font-black text-slate-800 dark:text-white">-</span>
-                </div>
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
-                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">Total Installs</span>
-                  <span id="dash-kpi-installs" class="text-xl font-black text-slate-800 dark:text-white">-</span>
+
+                <div class="flex items-center justify-between md:justify-end gap-3 border-t md:border-t-0 pt-3 md:pt-0 border-slate-100 dark:border-slate-800 shrink-0">
+                  <div class="text-right">
+                    <span class="block text-[9px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Filter Result</span>
+                    <span id="eda-filter-count" class="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">0 apps matched</span>
+                  </div>
+                  <button id="eda-filter-reset" class="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 text-xs font-semibold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all cursor-pointer">
+                    Reset
+                  </button>
                 </div>
               </div>
 
-              <!-- SECTION 2 & SECTION 3 (Two column layout) -->
+              <!-- KPI Summary Cards -->
+              <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Apps</span>
+                  <span id="dash-kpi-apps" class="text-lg font-black text-slate-800 dark:text-white block mt-1">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Categories</span>
+                  <span id="dash-kpi-categories" class="text-lg font-black text-indigo-600 dark:text-indigo-400 block mt-1">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs col-span-2 lg:col-span-1">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Average Rating</span>
+                  <span id="dash-kpi-rating" class="text-lg font-black text-indigo-600 dark:text-indigo-400 block mt-1">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Reviews</span>
+                  <span id="dash-kpi-reviews" class="text-lg font-black text-slate-800 dark:text-white block mt-1">-</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
+                  <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Installs</span>
+                  <span id="dash-kpi-installs" class="text-lg font-black text-slate-800 dark:text-white block mt-1">-</span>
+                </div>
+              </div>
+
+              <!-- Main Dashboard Chart Layout -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- SECTION 2: RATING DISTRIBUTION -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between">
+
+                <!-- 1. Rating Distribution Histogram -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4">
                   <div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Rating Distribution (Histogram)</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Empirical count of applications falling across rating buckets from 1.0 to 5.0, overlaid with the mathematical mean.</p>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Rating Distribution Pattern</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Histogram showing application rating counts and average mean.</p>
                   </div>
-                  <div id="dash-hist-container" class="w-full h-56 relative bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-2 flex items-center justify-center">
-                    <!-- SVG drawn dynamically -->
-                  </div>
+                  <div id="dash-hist-container" class="h-44 w-full flex items-center justify-center"></div>
                 </div>
 
-                <!-- SECTION 3: CATEGORY ANALYSIS -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 flex flex-col justify-between">
+                <!-- 2. Free vs Paid Apps Donut Chart -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4">
                   <div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Top 10 Categories by Avg Rating</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Average store ratings across the top-performing market niches, sorted descending.</p>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Monetization Mix</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Distribution and ratios of free vs. paid installations in the dataset.</p>
                   </div>
-                  <div id="dash-bar-container" class="space-y-2 pt-2 bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-4">
-                    <!-- Bars drawn dynamically -->
-                  </div>
+                  <div id="dash-free-paid-container" class="w-full"></div>
                 </div>
+
+                <!-- 3. Category-wise App Count -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category-wise App Count</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Representation of the volume of apps cataloged across primary categories.</p>
+                  </div>
+                  <div id="dash-category-count-container" class="space-y-3 max-h-60 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- 4. Category-wise Average Rating -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Category-wise Average Rating</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Performance index indicating average quality score across domains.</p>
+                  </div>
+                  <div id="dash-bar-container" class="space-y-3 max-h-60 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- 5. Installs vs Rating Scatter Plot -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Installs vs. Rating</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Evaluating the relation between user ratings and app installation growth.</p>
+                  </div>
+                  <div id="dash-scatter-installs" class="h-48 w-full flex items-center justify-center"></div>
+                </div>
+
+                <!-- 6. Reviews vs Rating Scatter Plot -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Reviews vs. Rating</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Correlation mapping between user engagement reviews and score ratings.</p>
+                  </div>
+                  <div id="dash-scatter-reviews" class="h-48 w-full flex items-center justify-center"></div>
+                </div>
+
+                <!-- 7. Correlation Heatmap -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-2xs space-y-4 lg:col-span-2">
+                  <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Feature Correlation Matrix</h3>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">Pearson correlation factors matrix mapped across key feature variables.</p>
+                  </div>
+                  <div id="dash-heatmap-container" class="w-full"></div>
+                </div>
+
               </div>
 
-              <!-- SECTION 4: RELATIONSHIPS -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Scatter 1: Reviews vs Rating -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 relative">
-                  <div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Reviews vs App Rating</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Scatter plot mapping user reviews counts to overall rating scores. Hover points for details.</p>
-                  </div>
-                  <div id="dash-scatter-reviews" class="w-full h-64 relative bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-2 flex items-center justify-center">
-                    <!-- SVG drawn dynamically -->
-                  </div>
-                </div>
-
-                <!-- Scatter 2: Installs vs Rating -->
-                <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4 relative">
-                  <div>
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Installs vs App Rating</h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Scatter plot mapping total installs scale to overall rating scores. Hover points for details.</p>
-                  </div>
-                  <div id="dash-scatter-installs" class="w-full h-64 relative bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-2 flex items-center justify-center">
-                    <!-- SVG drawn dynamically -->
-                  </div>
-                </div>
-              </div>
-
-              <!-- Shared Interactive Scatter Tooltip -->
-              <div id="scatter-tooltip" class="absolute hidden z-50 pointer-events-none bg-slate-900/95 dark:bg-slate-950/95 text-white text-[10px] font-semibold px-3 py-2 rounded-xl shadow-lg border border-slate-700/50 backdrop-blur-xs flex flex-col space-y-0.5 max-w-xs transition-opacity duration-150">
-                <!-- Tooltip content filled dynamically -->
-              </div>
-
-              <!-- SECTION 5: CORRELATION -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-4">
-                <div>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Feature Correlation Matrix (Heatmap)</h3>
-                  <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Computed Pearson coefficients showing relationships across numeric store dimensions. Positive correlations are highlighted in green, negative values in red.</p>
-                </div>
-                <div class="max-w-xl mx-auto pt-2 overflow-x-auto">
-                  <div id="dash-heatmap-container" class="min-w-[340px] bg-slate-50 dark:bg-slate-950/20 border border-slate-100 dark:border-slate-800 rounded-xl p-4">
-                    <!-- Heatmap grid drawn dynamically -->
-                  </div>
-                </div>
-              </div>
+              <!-- Scatter Tooltip -->
+              <div id="scatter-tooltip" class="absolute hidden bg-slate-900/95 dark:bg-slate-950/95 border border-slate-700/50 rounded-xl p-3 shadow-xl text-xs text-white z-50 pointer-events-none flex flex-col space-y-0.5 animate-fadeIn"></div>
 
             </div>
           </div>

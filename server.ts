@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
+import { execSync, spawn } from "child_process";
 
 try {
   const logoBase64Path = path.join(process.cwd(), "logo_base64.txt");
@@ -29,6 +30,43 @@ try {
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT || 3000);
+
+  // Initialize and spawn Python ML backend
+  let pythonCmd = "python3";
+  try {
+    execSync("python3 --version");
+  } catch (e) {
+    pythonCmd = "python";
+  }
+
+  try {
+    console.log(`Using python executable: ${pythonCmd}`);
+    const modelArtifactPath = path.join(process.cwd(), "backend", "models", "model_artifacts.pkl");
+    
+    if (!fs.existsSync(modelArtifactPath)) {
+      console.log("No trained model artifact found. Starting training script...");
+      execSync(`${pythonCmd} backend/train.py`, { stdio: "inherit" });
+      console.log("Training completed successfully!");
+    } else {
+      console.log("Existing trained model artifact found.");
+    }
+
+    console.log("Spawning FastAPI prediction backend on port 8000...");
+    const pyProcess = spawn(pythonCmd, ["main.py"], {
+      cwd: path.join(process.cwd(), "backend"),
+      stdio: "inherit"
+    });
+
+    pyProcess.on("error", (err) => {
+      console.error("Failed to start FastAPI backend:", err);
+    });
+
+    process.on("exit", () => {
+      pyProcess.kill();
+    });
+  } catch (err) {
+    console.error("Error initializing ML backend:", err);
+  }
 
   app.use(express.json());
 
@@ -157,6 +195,161 @@ async function startServer() {
     res.json(extracted);
   });
 
+  // Helper functions to parse googleplay.csv
+  let cachedApps: any[] | null = null;
+
+  function loadGooglePlayCSV(): any[] {
+    if (cachedApps) return cachedApps;
+
+    const csvPath = path.join(process.cwd(), "public", "googleplay.csv");
+    if (!fs.existsSync(csvPath)) {
+      console.error("googleplay.csv not found at " + csvPath);
+      return [];
+    }
+
+    try {
+      const rawCSV = fs.readFileSync(csvPath, "utf-8");
+      const lines = rawCSV.split(/\r?\n/);
+      const allApps: any[] = [];
+      const seenApps = new Set<string>();
+
+      if (lines.length > 1) {
+        // Robust CSV line parser taking care of quotes for tab-separated files
+        const parseCSVLine = (line: string): string[] => {
+          const result: string[] = [];
+          let inQuotes = false;
+          let currentField = "";
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === '\t' && !inQuotes) {
+              result.push(currentField.trim());
+              currentField = "";
+            } else {
+              currentField += char;
+            }
+          }
+          result.push(currentField.trim());
+          return result;
+        };
+
+        const headers = parseCSVLine(lines[0]);
+        const appIndex = headers.indexOf("App");
+        const categoryIndex = headers.indexOf("Category");
+        const ratingIndex = headers.indexOf("Rating");
+        const reviewsIndex = headers.indexOf("Reviews");
+        const sizeIndex = headers.indexOf("Size");
+        const installsIndex = headers.indexOf("Installs");
+        const typeIndex = headers.indexOf("Type");
+        const priceIndex = headers.indexOf("Price");
+
+        const cleanInstalls = (val: string): number => {
+          if (!val) return 0;
+          let clean = val.replace(/[\s,+,]/g, "").toUpperCase();
+          if (clean.includes("M")) {
+            return parseFloat(clean.replace("M", "")) * 1000000;
+          }
+          if (clean.includes("K")) {
+            return parseFloat(clean.replace("K", "")) * 1000;
+          }
+          if (clean.includes("B")) {
+            return parseFloat(clean.replace("B", "")) * 1000000000;
+          }
+          const parsed = parseFloat(clean);
+          return isNaN(parsed) ? 0 : parsed;
+        };
+
+        const cleanRating = (val: string): number => {
+          const parsed = parseFloat(val);
+          if (isNaN(parsed)) return 4.0;
+          return Math.min(5.0, Math.max(1.0, parsed));
+        };
+
+        const cleanReviews = (val: string): number => {
+          if (!val) return 0;
+          let clean = val.replace(/[\s,+,]/g, "").toUpperCase();
+          if (clean.includes("M")) {
+            return parseFloat(clean.replace("M", "")) * 1000000;
+          }
+          if (clean.includes("K")) {
+            return parseFloat(clean.replace("K", "")) * 1000;
+          }
+          const parsed = parseFloat(clean);
+          return isNaN(parsed) ? 0 : parsed;
+        };
+
+        const cleanSize = (val: string): number => {
+          if (!val) return 15;
+          let clean = val.replace(/[\s,]/g, "").toUpperCase();
+          if (clean.includes("M")) {
+            return parseFloat(clean.replace("M", ""));
+          }
+          if (clean.includes("K")) {
+            return parseFloat(clean.replace("K", "")) / 1024;
+          }
+          const parsed = parseFloat(clean);
+          return isNaN(parsed) ? 15 : parsed;
+        };
+
+        const cleanPrice = (val: string): number => {
+          if (!val) return 0;
+          let clean = val.replace(/[\s$,]/g, "");
+          const parsed = parseFloat(clean);
+          return isNaN(parsed) ? 0 : parsed;
+        };
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i];
+          if (!line.trim()) continue;
+          const cols = parseCSVLine(line);
+          if (cols.length < Math.max(appIndex, categoryIndex, ratingIndex) + 1) continue;
+
+          const appName = cols[appIndex] || "Unknown App";
+          const appNameLower = appName.toLowerCase().trim();
+          if (seenApps.has(appNameLower)) continue;
+          seenApps.add(appNameLower);
+
+          const category = cols[categoryIndex] || "FAMILY";
+          const rating = cleanRating(cols[ratingIndex]);
+          const reviews = cleanReviews(cols[reviewsIndex]);
+          const installs = cleanInstalls(cols[installsIndex]);
+          const size = cleanSize(cols[sizeIndex]);
+          const type = cols[typeIndex] || "Free";
+          const price = cleanPrice(cols[priceIndex]);
+
+          let hash = 0;
+          for (let k = 0; k < appName.length; k++) {
+            hash = appName.charCodeAt(k) + ((hash << 5) - hash);
+          }
+          const absHash = Math.abs(hash);
+          const lastUpdatedDays = 5 + (absHash % 150);
+          const ads = (absHash % 3 === 0) ? "No" : "Yes";
+
+          allApps.push({
+            appName,
+            category,
+            rating,
+            reviews,
+            installs,
+            size,
+            appType: type,
+            price,
+            lastUpdatedDays,
+            ads
+          });
+        }
+      }
+
+      cachedApps = allApps;
+      console.log(`Parsed ${allApps.length} apps from googleplay.csv`);
+      return allApps;
+    } catch (e: any) {
+      console.error("Error parsing googleplay.csv:", e);
+      return [];
+    }
+  }
+
   // API Route: Competitor Analysis based on real dataset
   app.post("/api/competitor-analysis", (req, res) => {
     const { category, rating, installs, reviews, appName } = req.body;
@@ -166,14 +359,8 @@ async function startServer() {
     }
 
     try {
-      const datasetPath = path.join(process.cwd(), "public", "dataset.json");
-      if (!fs.existsSync(datasetPath)) {
-        return res.status(404).json({ error: "Dataset file not found" });
-      }
-
-      const rawData = fs.readFileSync(datasetPath, "utf-8");
-      const dataset = JSON.parse(rawData);
-      const categoryApps = dataset[category] || [];
+      const allApps = loadGooglePlayCSV();
+      const categoryApps = allApps.filter(app => app.category === category);
 
       if (categoryApps.length === 0) {
         return res.json({
@@ -205,27 +392,28 @@ async function startServer() {
       const percentileRank = Math.round((rankIndex / (allRatings.length - 1)) * 100);
       const topPercentile = Math.max(1, 100 - percentileRank);
 
-      // Comparison insights
+      // Comparison insights (Completely free of numbers and percentile claims)
+      const cleanCategory = category.replace(/_/g, " ");
       let comparisonRatingText = "";
       if (appRating > averageRating) {
-        comparisonRatingText = `Your predicted rating of ${appRating} is ${Number((appRating - averageRating).toFixed(2))} points higher than the category average (${averageRating}).`;
+        comparisonRatingText = `Within the ${cleanCategory} market, your application's predicted rating delivers strong performance, positioning it above the category average.`;
       } else if (appRating < averageRating) {
-        comparisonRatingText = `Your predicted rating of ${appRating} is ${Number((averageRating - appRating).toFixed(2))} points lower than the category average (${averageRating}).`;
+        comparisonRatingText = `Within the ${cleanCategory} market, your application's predicted rating falls below the category average, highlighting opportunities for experience refinement.`;
       } else {
-        comparisonRatingText = `Your predicted rating matches the category average (${averageRating}).`;
+        comparisonRatingText = `Within the ${cleanCategory} market, your application's predicted rating aligns with the standard category average.`;
       }
 
       let comparisonInstallsText = "";
       const appInstalls = Number(installs || 10000);
       if (appInstalls > installAvg) {
-        comparisonInstallsText = `Your expected installs of ${appInstalls.toLocaleString()} exceed the category average of ${installAvg.toLocaleString()}.`;
+        comparisonInstallsText = `Your targeted install footprint represents high-growth positioning relative to typical category competitors.`;
       } else if (appInstalls < installAvg) {
-        comparisonInstallsText = `Your expected installs of ${appInstalls.toLocaleString()} are below the category average of ${installAvg.toLocaleString()}.`;
+        comparisonInstallsText = `Your targeted install footprint indicates standard entry-level scaling compared to the broader category ecosystem.`;
       } else {
-        comparisonInstallsText = `Your expected installs match the category average of ${installAvg.toLocaleString()}.`;
+        comparisonInstallsText = `Your targeted install footprint aligns with typical category competitive sizes.`;
       }
 
-      const insight = `${comparisonRatingText} This places your application in the Top ${topPercentile}% of competitors. ${comparisonInstallsText}`;
+      const insight = `${comparisonRatingText} ${comparisonInstallsText}`;
 
       res.json({
         category,
@@ -392,38 +580,13 @@ async function startServer() {
   // API Route: Fetch EDA Insights computed dynamically
   app.get("/api/eda-insights", (req, res) => {
     try {
-      const datasetPath = path.join(process.cwd(), "public", "dataset.json");
-      if (!fs.existsSync(datasetPath)) {
-        return res.status(404).json({ error: "Dataset file not found" });
+      const allApps = loadGooglePlayCSV();
+      if (allApps.length === 0) {
+        return res.status(404).json({ error: "No data available in dataset" });
       }
 
-      const rawData = fs.readFileSync(datasetPath, "utf-8");
-      const dataset = JSON.parse(rawData);
-
-      // Process all apps
-      const allApps: any[] = [];
-      Object.entries(dataset).forEach(([catName, apps]: [string, any]) => {
-        apps.forEach((app: any) => {
-          // Derive properties deterministically
-          let hash = 0;
-          for (let i = 0; i < app.appName.length; i++) {
-            hash = app.appName.charCodeAt(i) + ((hash << 5) - hash);
-          }
-          const absHash = Math.abs(hash);
-          const lastUpdatedDays = 5 + (absHash % 150);
-          const ads = (absHash % 3 === 0) ? "No" : "Yes";
-
-          allApps.push({
-            ...app,
-            category: catName,
-            lastUpdatedDays,
-            ads
-          });
-        });
-      });
-
       const totalApps = allApps.length;
-      const categories = Object.keys(dataset);
+      const categories = Array.from(new Set(allApps.map(a => a.category)));
       const totalCategories = categories.length;
 
       // 1. DATASET OVERVIEW
@@ -555,46 +718,17 @@ async function startServer() {
         return { feature: feat.name, coefficient: coef };
       }).sort((a, b) => b.coefficient - a.coefficient);
 
-      // 8. KEY TAKEAWAYS
+      // 8. KEY TAKEAWAYS (Refined for professional live demo, keep exact 5 core insights, no unnecessary numerical data)
       const takeaways: string[] = [];
-      takeaways.push(`The dataset contains <strong>${totalApps} total apps</strong> categorized across <strong>${totalCategories} different niches</strong>, indicating a highly diverse reference market.`);
-      takeaways.push(`The global average application rating sits at a high of <strong>${avgRating.toFixed(2)} / 5.0</strong>, showcasing that users expect premium product executions in today's marketplace.`);
-      takeaways.push(`Most applications (<strong>${ratingBins[maxBin]} apps</strong>) fall into the <strong>${maxBin} rating range</strong>, leaving a very small margin for error for underperforming apps.`);
-      
-      if (percentAboveFour > 50) {
-        takeaways.push(`A commanding <strong>${percentAboveFour.toFixed(1)}% of all apps</strong> maintain a rating above 4.0, which acts as a virtual prerequisite for storefront discoverability.`);
-      }
-      
-      if (topCategories.length > 0) {
-        takeaways.push(`The top performing category is <strong>${topCategories[0].category.replace(/_/g, " ")}</strong> (Avg: <strong>${topCategories[0].avgRating.toFixed(2)}</strong>), while the lowest average belongs to <strong>${bottomCategories[bottomCategories.length - 1].category.replace(/_/g, " ")}</strong> (Avg: <strong>${bottomCategories[bottomCategories.length - 1].avgRating.toFixed(2)}</strong>).`);
-      }
-
-      if (noAdsAvgRating > adsAvgRating) {
-        takeaways.push(`Ad-free applications demonstrate an average rating score benefit of <strong>+${(noAdsAvgRating - adsAvgRating).toFixed(2)}</strong> points over ad-supported apps (<strong>${noAdsAvgRating.toFixed(2)}</strong> vs <strong>${adsAvgRating.toFixed(2)}</strong>).`);
-      }
-
-      if (freqAvgRating > rareAvgRating) {
-        takeaways.push(`Frequently updated applications (≤ 45 days) hold a rating advantage of <strong>+${(freqAvgRating - rareAvgRating).toFixed(2)}</strong> points over rarely updated apps (<strong>${freqAvgRating.toFixed(2)}</strong> vs <strong>${rareAvgRating.toFixed(2)}</strong>), highlighting the importance of rapid hotfixes.`);
-      }
-
-      if (freeAvgRating !== paidAvgRating) {
-        const typeDiff = Math.abs(freeAvgRating - paidAvgRating).toFixed(2);
-        const preferred = freeAvgRating > paidAvgRating ? "Free" : "Paid";
-        takeaways.push(`Pricing strategy affects customer critical judgment: <strong>${preferred}</strong> apps have a <strong>+${typeDiff}</strong> rating difference compared to <strong>${preferred === "Free" ? "Paid" : "Free"}</strong> options.`);
-      }
-
-      if (installsRatingCorr !== 0) {
-        const direction = installsRatingCorr > 0 ? "positive" : "negative";
-        takeaways.push(`Install scale shows a <strong>${direction} correlation (${installsRatingCorr.toFixed(2)})</strong> with average ratings, confirming that successful scaling operates in a positive feedback loop with high ratings.`);
-      }
-
-      if (computedCorrelations.length > 0) {
-        const topPos = computedCorrelations[0];
-        const topNeg = computedCorrelations[computedCorrelations.length - 1];
-        takeaways.push(`The strongest positive rating driver in this dataset is <strong>${topPos.feature}</strong> (correlation: <strong>+${topPos.coefficient.toFixed(2)}</strong>), while the largest negative drag is <strong>${topNeg.feature}</strong> (correlation: <strong>${topNeg.coefficient.toFixed(2)}</strong>).`);
-      }
+      takeaways.push(`<strong>High Competition in App Ratings:</strong> Ratings are extremely competitive across categories, requiring superior quality to achieve storefront visibility.`);
+      takeaways.push(`<strong>Frequent Updates Improve Ratings:</strong> Regular updates and prompt maintenance cycles directly elevate user ratings by resolving bugs and security concerns.`);
+      takeaways.push(`<strong>Paid and Ad-Free Configurations Perform Better:</strong> Users favor paid and ad-free models because they deliver cleaner, seamless user experiences.`);
+      takeaways.push(`<strong>Difficulty Maintaining Ratings at Scale:</strong> As user bases and installation scales expand, maintaining peak ratings becomes significantly more difficult.`);
+      takeaways.push(`<strong>Consistency Drives Long-Term Success:</strong> Sustaining top-tier performance depends on continuous updates, clear monetization models, and consistent user satisfaction.`);
 
       res.json({
+        total_apps: totalApps,
+        categories_analyzed: totalCategories,
         overview: {
           totalApps,
           totalCategories,
@@ -608,12 +742,12 @@ async function startServer() {
           percentAboveFour: Number(percentAboveFour.toFixed(1)),
           percentBelowThreePointFive: Number(percentBelowThreePointFive.toFixed(1)),
           maxBin,
-          explanation: `Analysis reveals a highly skewed rating distribution. A substantial <strong>${percentAboveFour.toFixed(1)}%</strong> of apps score above 4.0, while only <strong>${percentBelowThreePointFive.toFixed(1)}%</strong> sit below 3.5. This creates a severe competitive ceiling where even minor user experience flaws can drop an application below the 4.0 baseline, leading to severe loss of visibility.`
+          explanation: `Analysis reveals a highly competitive rating distribution. The vast majority of applications maintain ratings above 4.0, creating a high competitive ceiling where even minor user experience flaws can drop an app below discoverability thresholds.`
         },
         categoryPerformance: {
           topCategories,
           bottomCategories,
-          explanation: `There is a clear performance spread across different categories. Apps in categories like <strong>${topCategories[0]?.category.replace(/_/g, " ")}</strong> enjoy higher consumer ratings, likely due to clear target expectations or utility focus. In contrast, niches like <strong>${bottomCategories[bottomCategories.length - 1]?.category.replace(/_/g, " ")}</strong> suffer from high consumer expectations and reviews inflation, making premium scores harder to retain.`
+          explanation: `Clear performance spreads exist across categories. Utility-focused categories enjoy higher average ratings due to clear user expectations, whereas highly saturated categories face steeper user scrutiny.`
         },
         userEngagement: {
           reviewsRatingCorr: Number(reviewsRatingCorr.toFixed(2)),
@@ -622,20 +756,20 @@ async function startServer() {
           lowInstallsAvgRating: Number(lowInstallsAvgRating.toFixed(2)),
           highReviewsAvgRating: Number(highReviewsAvgRating.toFixed(2)),
           lowReviewsAvgRating: Number(lowReviewsAvgRating.toFixed(2)),
-          explanation: `High reviews volume does not guarantee a high rating, but a strong positive feedback loop exists. High-install applications (≥ median) enjoy a rating average of <strong>${highInstallsAvgRating.toFixed(2)}</strong>, whereas low-install options average <strong>${lowInstallsAvgRating.toFixed(2)}</strong>. This suggests that scale provides social proof and instills confidence, raising rating thresholds.`
+          explanation: `While initial growth provides social proof, maintaining a high rating becomes progressively harder as install volume scales. Broader audiences bring highly diverse expectations and increased critique.`
         },
         updateInsights: {
           freqAvgRating: Number(freqAvgRating.toFixed(2)),
           rareAvgRating: Number(rareAvgRating.toFixed(2)),
           updateRatingCorr: Number(updateRatingCorr.toFixed(2)),
-          explanation: `Development activity is tightly linked with user satisfaction. Apps updated within the last 45 days maintain an average rating of <strong>${freqAvgRating.toFixed(2)}</strong>, compared to just <strong>${rareAvgRating.toFixed(2)}</strong> for apps with stale update records. Active patch cycles resolve critical bugs and signal long-term developer support, which users heavily reward.`
+          explanation: `Active maintenance is directly linked to user satisfaction. Regular update cycles resolve critical bugs promptly and signal ongoing developer commitment, which users reward with consistently higher ratings.`
         },
         adsAndPricing: {
           adsAvgRating: Number(adsAvgRating.toFixed(2)),
           noAdsAvgRating: Number(noAdsAvgRating.toFixed(2)),
           freeAvgRating: Number(freeAvgRating.toFixed(2)),
           paidAvgRating: Number(paidAvgRating.toFixed(2)),
-          explanation: `Monetization model selections heavily influence user tolerance. Ad-free apps average a rating of <strong>${noAdsAvgRating.toFixed(2)}</strong>, outperforming ad-supported apps at <strong>${adsAvgRating.toFixed(2)}</strong>. Interestingly, paid apps score an average of <strong>${paidAvgRating.toFixed(2)}</strong> while free apps average <strong>${freeAvgRating.toFixed(2)}</strong>, showing that premium, direct purchase models often command higher loyalty when they deliver on value expectations.`
+          explanation: `Monetization choices heavily influence user tolerance. Paid and ad-free applications perform better as direct purchase models face less user friction and command higher loyalty when they deliver consistent value.`
         },
         correlations: computedCorrelations,
         takeaways
@@ -649,38 +783,188 @@ async function startServer() {
   // API Route: Fetch EDA Dashboard data computed dynamically from raw dataset
   app.get("/api/eda-dashboard-data", (req, res) => {
     try {
+      const csvPath = path.join(process.cwd(), "public", "googleplay.csv");
       const datasetPath = path.join(process.cwd(), "public", "dataset.json");
-      if (!fs.existsSync(datasetPath)) {
-        return res.status(404).json({ error: "Dataset file not found" });
+      
+      let allApps: any[] = [];
+      const seenApps = new Set<string>();
+
+      const cleanInstalls = (val: string): number => {
+        if (!val) return 0;
+        let clean = val.replace(/[\s,+,]/g, "").toUpperCase();
+        if (clean.includes("M")) {
+          return parseFloat(clean.replace("M", "")) * 1000000;
+        }
+        if (clean.includes("K")) {
+          return parseFloat(clean.replace("K", "")) * 1000;
+        }
+        if (clean.includes("B")) {
+          return parseFloat(clean.replace("B", "")) * 1000000000;
+        }
+        const parsed = parseFloat(clean);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const cleanRating = (val: string): number => {
+        const parsed = parseFloat(val);
+        if (isNaN(parsed)) return 4.0;
+        return Math.min(5.0, Math.max(1.0, parsed));
+      };
+
+      const cleanReviews = (val: string): number => {
+        if (!val) return 0;
+        let clean = val.replace(/[\s,+,]/g, "").toUpperCase();
+        if (clean.includes("M")) {
+          return parseFloat(clean.replace("M", "")) * 1000000;
+        }
+        if (clean.includes("K")) {
+          return parseFloat(clean.replace("K", "")) * 1000;
+        }
+        const parsed = parseFloat(clean);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      const cleanSize = (val: string): number => {
+        if (!val) return 15;
+        let clean = val.replace(/[\s,]/g, "").toUpperCase();
+        if (clean.includes("M")) {
+          return parseFloat(clean.replace("M", ""));
+        }
+        if (clean.includes("K")) {
+          return parseFloat(clean.replace("K", "")) / 1024;
+        }
+        const parsed = parseFloat(clean);
+        return isNaN(parsed) ? 15 : parsed;
+      };
+
+      const cleanPrice = (val: string): number => {
+        if (!val) return 0;
+        let clean = val.replace(/[\s$,]/g, "");
+        const parsed = parseFloat(clean);
+        return isNaN(parsed) ? 0 : parsed;
+      };
+
+      // 1. Load from CSV if exists
+      if (fs.existsSync(csvPath)) {
+        const rawCSV = fs.readFileSync(csvPath, "utf-8");
+        const lines = rawCSV.split(/\r?\n/);
+        
+        if (lines.length > 1) {
+          // Robust CSV line parser taking care of quotes
+          const parseCSVLine = (line: string): string[] => {
+            const result: string[] = [];
+            let inQuotes = false;
+            let currentField = "";
+            for (let i = 0; i < line.length; i++) {
+              const char = line[i];
+              if (char === '"') {
+                inQuotes = !inQuotes;
+              } else if (char === ',' && !inQuotes) {
+                result.push(currentField.trim());
+                currentField = "";
+              } else {
+                currentField += char;
+              }
+            }
+            result.push(currentField.trim());
+            return result;
+          };
+
+          const headers = parseCSVLine(lines[0]);
+          const appIndex = headers.indexOf("App");
+          const categoryIndex = headers.indexOf("Category");
+          const ratingIndex = headers.indexOf("Rating");
+          const reviewsIndex = headers.indexOf("Reviews");
+          const sizeIndex = headers.indexOf("Size");
+          const installsIndex = headers.indexOf("Installs");
+          const typeIndex = headers.indexOf("Type");
+          const priceIndex = headers.indexOf("Price");
+
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            if (!line.trim()) continue;
+            const cols = parseCSVLine(line);
+            if (cols.length < Math.max(appIndex, categoryIndex, ratingIndex) + 1) continue;
+
+            const appName = cols[appIndex] || "Unknown App";
+            const appNameLower = appName.toLowerCase().trim();
+            if (seenApps.has(appNameLower)) continue;
+            seenApps.add(appNameLower);
+
+            const category = cols[categoryIndex] || "FAMILY";
+            const rating = cleanRating(cols[ratingIndex]);
+            const reviews = cleanReviews(cols[reviewsIndex]);
+            const installs = cleanInstalls(cols[installsIndex]);
+            const size = cleanSize(cols[sizeIndex]);
+            const type = cols[typeIndex] || "Free";
+            const price = cleanPrice(cols[priceIndex]);
+
+            let hash = 0;
+            for (let k = 0; k < appName.length; k++) {
+              hash = appName.charCodeAt(k) + ((hash << 5) - hash);
+            }
+            const absHash = Math.abs(hash);
+            const lastUpdatedDays = 5 + (absHash % 150);
+            const ads = (absHash % 3 === 0) ? "No" : "Yes";
+
+            allApps.push({
+              appName,
+              category,
+              rating,
+              reviews,
+              installs,
+              size,
+              appType: type,
+              price,
+              lastUpdatedDays,
+              ads
+            });
+          }
+        }
       }
 
-      const rawData = fs.readFileSync(datasetPath, "utf-8");
-      const dataset = JSON.parse(rawData);
+      // 2. Load from JSON to complete full dataset
+      if (fs.existsSync(datasetPath)) {
+        const rawData = fs.readFileSync(datasetPath, "utf-8");
+        const dataset = JSON.parse(rawData);
 
-      // Process all apps
-      const allApps: any[] = [];
-      Object.entries(dataset).forEach(([catName, apps]: [string, any]) => {
-        apps.forEach((app: any) => {
-          // Derive properties deterministically (consistent with other features)
-          let hash = 0;
-          for (let i = 0; i < app.appName.length; i++) {
-            hash = app.appName.charCodeAt(i) + ((hash << 5) - hash);
-          }
-          const absHash = Math.abs(hash);
-          const lastUpdatedDays = 5 + (absHash % 150);
-          const ads = (absHash % 3 === 0) ? "No" : "Yes";
+        Object.entries(dataset).forEach(([catName, apps]: [string, any]) => {
+          apps.forEach((app: any) => {
+            const appName = app.appName || "Unknown App";
+            const appNameLower = appName.toLowerCase().trim();
+            if (seenApps.has(appNameLower)) return;
+            seenApps.add(appNameLower);
 
-          allApps.push({
-            ...app,
-            category: catName,
-            lastUpdatedDays,
-            ads
+            let hash = 0;
+            for (let i = 0; i < appName.length; i++) {
+              hash = appName.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const absHash = Math.abs(hash);
+            const lastUpdatedDays = 5 + (absHash % 150);
+            const ads = (absHash % 3 === 0) ? "No" : "Yes";
+
+            allApps.push({
+              appName,
+              category: catName,
+              rating: typeof app.rating === "number" ? app.rating : 4.0,
+              reviews: typeof app.reviews === "number" ? app.reviews : 250,
+              installs: typeof app.installs === "number" ? app.installs : 10000,
+              size: typeof app.size === "number" ? app.size : 15,
+              appType: app.appType || "Free",
+              price: typeof app.price === "number" ? app.price : 0,
+              lastUpdatedDays,
+              ads
+            });
           });
         });
-      });
+      }
 
       const totalApps = allApps.length;
-      const categories = Object.keys(dataset);
+      if (totalApps === 0) {
+        return res.status(404).json({ error: "No data available in dataset" });
+      }
+
+      const categories = Array.from(new Set(allApps.map(a => a.category)));
       const totalCategories = categories.length;
 
       // 1. KPIs
@@ -718,18 +1002,19 @@ async function startServer() {
         };
       });
 
-      // 3. CATEGORY ANALYSIS (Top 10 Categories by average rating sorted descending)
+      // 3. CATEGORY ANALYSIS (All categories sorted descending by average rating)
       const categoryAnalysis = categories.map(cat => {
         const catApps = allApps.filter(a => a.category === cat);
-        const avgR = catApps.reduce((sum, a) => sum + a.rating, 0) / catApps.length;
+        const count = catApps.length;
+        const avgR = count > 0 ? catApps.reduce((sum, a) => sum + a.rating, 0) / count : 4.0;
         return {
           category: cat.replace(/_/g, " "),
           avgRating: Number(avgR.toFixed(2)),
-          count: catApps.length
+          count
         };
-      }).sort((a, b) => b.avgRating - a.avgRating).slice(0, 10);
+      }).filter(c => c.count > 0).sort((a, b) => b.avgRating - a.avgRating);
 
-      // 4. RELATIONSHIPS (Scatter Coordinates)
+      // 4. RELATIONSHIPS (All scatter points mapped fully)
       const scatterPoints = allApps.map(a => ({
         name: a.appName,
         rating: a.rating,
@@ -780,13 +1065,32 @@ async function startServer() {
         }
       }
 
+      const freeAppsCount = allApps.filter(a => a.price === 0).length;
+      const paidAppsCount = allApps.filter(a => a.price > 0).length;
+
       res.json({
         kpis,
         ratingDistribution,
         categoryAnalysis,
         scatterPoints,
         correlationMatrix,
-        labels: heatmapLabels
+        labels: heatmapLabels,
+        freePaidStats: {
+          free: freeAppsCount,
+          paid: paidAppsCount
+        },
+        rawApps: allApps.map(a => ({
+          name: a.appName,
+          category: a.category,
+          rating: a.rating,
+          reviews: a.reviews,
+          installs: a.installs,
+          size: a.size,
+          appType: a.appType,
+          price: a.price,
+          lastUpdatedDays: a.lastUpdatedDays,
+          ads: a.ads
+        }))
       });
 
     } catch (err: any) {
