@@ -157,11 +157,12 @@ apps_list = []
 csv_path = "public/googleplay.csv"
 if os.path.exists(csv_path):
     try:
-        df_csv = pd.read_csv("public/googleplay.csv")
-        print(f"Loading {len(df_csv)} apps from CSV...")
+        df_csv = pd.read_csv(csv_path, sep='\t', encoding='utf-8-sig')
+        raw_row_count = len(df_csv)
+        print(f"DEBUG: CSV file loaded successfully. Raw row count: {raw_row_count}")
         for _, row in df_csv.iterrows():
             app_name = str(row.get('App', '')).strip()
-            if not app_name:
+            if not app_name or app_name.lower() == 'nan':
                 continue
             apps_list.append({
                 "App": app_name,
@@ -170,6 +171,7 @@ if os.path.exists(csv_path):
                 "Reviews": row.get('Reviews', 0.0),
                 "Type": str(row.get('Type', 'Free')).strip().capitalize()
             })
+        print(f"DEBUG: Parsed {len(apps_list)} valid non-empty apps from raw CSV rows.")
     except Exception as e:
         print(f"Error loading {csv_path}: {e}")
 
@@ -192,7 +194,7 @@ if apps_list:
         }
         
     dataset_df = df_unified
-    print(f"Unified dataset successfully loaded with {len(dataset_df)} unique apps. Category stats ready.")
+    print(f"DEBUG: Unified dataset successfully loaded and processed with {len(dataset_df)} unique apps.")
 else:
     print("Warning: No apps loaded for prediction lookup!")
 

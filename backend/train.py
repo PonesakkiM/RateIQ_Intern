@@ -113,17 +113,19 @@ def main():
     
     # 1. Load Data
     csv_path = os.path.join("public", "googleplay.csv")
-    dataset_json_path = os.path.join("public", "dataset.json")
     
     apps_data = []
     
     # Load from googleplay.csv
     if os.path.exists(csv_path):
         try:
-            df_csv = pd.read_csv(csv_path)
-            print(f"Loaded {len(df_csv)} apps from {csv_path}")
+            df_csv = pd.read_csv(csv_path, sep='\t', encoding='utf-8-sig')
+            raw_row_count = len(df_csv)
+            print(f"DEBUG: Loaded {raw_row_count} raw rows from {csv_path}")
             for _, row in df_csv.iterrows():
-                app_name = str(row.get('App', ''))
+                app_name = str(row.get('App', '')).strip()
+                if not app_name or app_name.lower() == 'nan':
+                    continue
                 rating = row.get('Rating')
                 category = str(row.get('Category', ''))
                 reviews = row.get('Reviews')
@@ -146,6 +148,7 @@ def main():
                     "Installs": clean_installs(installs),
                     "Type": app_type
                 })
+            print(f"DEBUG: Parsed {len(apps_data)} valid rows with valid ratings from CSV.")
         except Exception as e:
             print(f"Error parsing {csv_path}: {e}")
             
@@ -154,10 +157,12 @@ def main():
         return
         
     df = pd.DataFrame(apps_data)
-    print(f"Combined dataset contains {len(df)} unique app records.")
     
     # Drop duplicates
+    initial_len = len(df)
     df = df.drop_duplicates(subset=['App'])
+    print(f"DEBUG: Combined dataset contains {initial_len} records before duplicate removal.")
+    print(f"DEBUG: Combined dataset contains {len(df)} unique app records after duplicate removal.")
     print(f"After dropping duplicates: {len(df)} apps.")
     
     # 2. Extract input features & target

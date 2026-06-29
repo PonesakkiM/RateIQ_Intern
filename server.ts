@@ -41,6 +41,24 @@ async function startServer() {
 
   try {
     console.log(`Using python executable: ${pythonCmd}`);
+    
+    // Install Python dependencies
+    try {
+      const reqPath = path.join(process.cwd(), "backend", "requirements.txt");
+      if (fs.existsSync(reqPath)) {
+        console.log("Installing Python dependencies from requirements.txt...");
+        try {
+          execSync("pip3 install -r backend/requirements.txt", { stdio: "inherit" });
+        } catch (e) {
+          console.log("pip3 failed, trying pip...");
+          execSync("pip install -r backend/requirements.txt", { stdio: "inherit" });
+        }
+        console.log("Python dependencies installed successfully!");
+      }
+    } catch (pipErr: any) {
+      console.error("Warning: Error installing Python dependencies:", pipErr.message);
+    }
+
     const modelArtifactPath = path.join(process.cwd(), "backend", "models", "model_artifacts.pkl");
     
     if (!fs.existsSync(modelArtifactPath)) {
@@ -208,7 +226,10 @@ async function startServer() {
     }
 
     try {
-      const rawCSV = fs.readFileSync(csvPath, "utf-8");
+      let rawCSV = fs.readFileSync(csvPath, "utf-8");
+      // Strip UTF-8 Byte Order Mark (BOM) if present
+      rawCSV = rawCSV.replace(/^\uFEFF/, "");
+      
       const lines = rawCSV.split(/\r?\n/);
       const allApps: any[] = [];
       const seenApps = new Set<string>();
@@ -234,15 +255,29 @@ async function startServer() {
           return result;
         };
 
-        const headers = parseCSVLine(lines[0]);
-        const appIndex = headers.indexOf("App");
-        const categoryIndex = headers.indexOf("Category");
-        const ratingIndex = headers.indexOf("Rating");
-        const reviewsIndex = headers.indexOf("Reviews");
-        const sizeIndex = headers.indexOf("Size");
-        const installsIndex = headers.indexOf("Installs");
-        const typeIndex = headers.indexOf("Type");
-        const priceIndex = headers.indexOf("Price");
+        const headers = parseCSVLine(lines[0]).map(h => h.replace(/^["']|["']$/g, "").trim());
+        const findHeaderIndex = (name: string): number => {
+          return headers.findIndex(h => h.toLowerCase() === name.toLowerCase());
+        };
+
+        const appIndex = findHeaderIndex("App");
+        const categoryIndex = findHeaderIndex("Category");
+        const ratingIndex = findHeaderIndex("Rating");
+        const reviewsIndex = findHeaderIndex("Reviews");
+        const sizeIndex = findHeaderIndex("Size");
+        const installsIndex = findHeaderIndex("Installs");
+        const typeIndex = findHeaderIndex("Type");
+        const priceIndex = findHeaderIndex("Price");
+
+        // Set fallback standard indices if headers were not matched properly
+        const finalAppIndex = appIndex !== -1 ? appIndex : 0;
+        const finalCategoryIndex = categoryIndex !== -1 ? categoryIndex : 1;
+        const finalRatingIndex = ratingIndex !== -1 ? ratingIndex : 2;
+        const finalReviewsIndex = reviewsIndex !== -1 ? reviewsIndex : 3;
+        const finalSizeIndex = sizeIndex !== -1 ? sizeIndex : 4;
+        const finalInstallsIndex = installsIndex !== -1 ? installsIndex : 5;
+        const finalTypeIndex = typeIndex !== -1 ? typeIndex : 6;
+        const finalPriceIndex = priceIndex !== -1 ? priceIndex : 7;
 
         const cleanInstalls = (val: string): number => {
           if (!val) return 0;
@@ -303,20 +338,25 @@ async function startServer() {
           const line = lines[i];
           if (!line.trim()) continue;
           const cols = parseCSVLine(line);
-          if (cols.length < Math.max(appIndex, categoryIndex, ratingIndex) + 1) continue;
+          
+          const getColVal = (index: number, fallback: string): string => {
+            if (index < 0 || index >= cols.length) return fallback;
+            const v = cols[index];
+            return v !== undefined && v !== null ? v : fallback;
+          };
 
-          const appName = cols[appIndex] || "Unknown App";
+          const appName = getColVal(finalAppIndex, "Unknown App");
           const appNameLower = appName.toLowerCase().trim();
           if (seenApps.has(appNameLower)) continue;
           seenApps.add(appNameLower);
 
-          const category = cols[categoryIndex] || "FAMILY";
-          const rating = cleanRating(cols[ratingIndex]);
-          const reviews = cleanReviews(cols[reviewsIndex]);
-          const installs = cleanInstalls(cols[installsIndex]);
-          const size = cleanSize(cols[sizeIndex]);
-          const type = cols[typeIndex] || "Free";
-          const price = cleanPrice(cols[priceIndex]);
+          const category = getColVal(finalCategoryIndex, "FAMILY");
+          const rating = cleanRating(getColVal(finalRatingIndex, "4.0"));
+          const reviews = cleanReviews(getColVal(finalReviewsIndex, "0"));
+          const installs = cleanInstalls(getColVal(finalInstallsIndex, "0"));
+          const size = cleanSize(getColVal(finalSizeIndex, "15"));
+          const type = getColVal(finalTypeIndex, "Free");
+          const price = cleanPrice(getColVal(finalPriceIndex, "0"));
 
           let hash = 0;
           for (let k = 0; k < appName.length; k++) {
@@ -342,7 +382,8 @@ async function startServer() {
       }
 
       cachedApps = allApps;
-      console.log(`Parsed ${allApps.length} apps from googleplay.csv`);
+      console.log(`[CSV Loader] Total raw lines: ${lines.length}`);
+      console.log(`[CSV Loader] Successfully parsed and loaded ${allApps.length} unique apps from googleplay.csv`);
       return allApps;
     } catch (e: any) {
       console.error("Error parsing googleplay.csv:", e);
@@ -783,183 +824,10 @@ async function startServer() {
   // API Route: Fetch EDA Dashboard data computed dynamically from raw dataset
   app.get("/api/eda-dashboard-data", (req, res) => {
     try {
-      const csvPath = path.join(process.cwd(), "public", "googleplay.csv");
-      const datasetPath = path.join(process.cwd(), "public", "dataset.json");
-      
-      let allApps: any[] = [];
-      const seenApps = new Set<string>();
-
-      const cleanInstalls = (val: string): number => {
-        if (!val) return 0;
-        let clean = val.replace(/[\s,+,]/g, "").toUpperCase();
-        if (clean.includes("M")) {
-          return parseFloat(clean.replace("M", "")) * 1000000;
-        }
-        if (clean.includes("K")) {
-          return parseFloat(clean.replace("K", "")) * 1000;
-        }
-        if (clean.includes("B")) {
-          return parseFloat(clean.replace("B", "")) * 1000000000;
-        }
-        const parsed = parseFloat(clean);
-        return isNaN(parsed) ? 0 : parsed;
-      };
-
-      const cleanRating = (val: string): number => {
-        const parsed = parseFloat(val);
-        if (isNaN(parsed)) return 4.0;
-        return Math.min(5.0, Math.max(1.0, parsed));
-      };
-
-      const cleanReviews = (val: string): number => {
-        if (!val) return 0;
-        let clean = val.replace(/[\s,+,]/g, "").toUpperCase();
-        if (clean.includes("M")) {
-          return parseFloat(clean.replace("M", "")) * 1000000;
-        }
-        if (clean.includes("K")) {
-          return parseFloat(clean.replace("K", "")) * 1000;
-        }
-        const parsed = parseFloat(clean);
-        return isNaN(parsed) ? 0 : parsed;
-      };
-
-      const cleanSize = (val: string): number => {
-        if (!val) return 15;
-        let clean = val.replace(/[\s,]/g, "").toUpperCase();
-        if (clean.includes("M")) {
-          return parseFloat(clean.replace("M", ""));
-        }
-        if (clean.includes("K")) {
-          return parseFloat(clean.replace("K", "")) / 1024;
-        }
-        const parsed = parseFloat(clean);
-        return isNaN(parsed) ? 15 : parsed;
-      };
-
-      const cleanPrice = (val: string): number => {
-        if (!val) return 0;
-        let clean = val.replace(/[\s$,]/g, "");
-        const parsed = parseFloat(clean);
-        return isNaN(parsed) ? 0 : parsed;
-      };
-
-      // 1. Load from CSV if exists
-      if (fs.existsSync(csvPath)) {
-        const rawCSV = fs.readFileSync(csvPath, "utf-8");
-        const lines = rawCSV.split(/\r?\n/);
-        
-        if (lines.length > 1) {
-          // Robust CSV line parser taking care of quotes
-          const parseCSVLine = (line: string): string[] => {
-            const result: string[] = [];
-            let inQuotes = false;
-            let currentField = "";
-            for (let i = 0; i < line.length; i++) {
-              const char = line[i];
-              if (char === '"') {
-                inQuotes = !inQuotes;
-              } else if (char === ',' && !inQuotes) {
-                result.push(currentField.trim());
-                currentField = "";
-              } else {
-                currentField += char;
-              }
-            }
-            result.push(currentField.trim());
-            return result;
-          };
-
-          const headers = parseCSVLine(lines[0]);
-          const appIndex = headers.indexOf("App");
-          const categoryIndex = headers.indexOf("Category");
-          const ratingIndex = headers.indexOf("Rating");
-          const reviewsIndex = headers.indexOf("Reviews");
-          const sizeIndex = headers.indexOf("Size");
-          const installsIndex = headers.indexOf("Installs");
-          const typeIndex = headers.indexOf("Type");
-          const priceIndex = headers.indexOf("Price");
-
-          for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
-            if (!line.trim()) continue;
-            const cols = parseCSVLine(line);
-            if (cols.length < Math.max(appIndex, categoryIndex, ratingIndex) + 1) continue;
-
-            const appName = cols[appIndex] || "Unknown App";
-            const appNameLower = appName.toLowerCase().trim();
-            if (seenApps.has(appNameLower)) continue;
-            seenApps.add(appNameLower);
-
-            const category = cols[categoryIndex] || "FAMILY";
-            const rating = cleanRating(cols[ratingIndex]);
-            const reviews = cleanReviews(cols[reviewsIndex]);
-            const installs = cleanInstalls(cols[installsIndex]);
-            const size = cleanSize(cols[sizeIndex]);
-            const type = cols[typeIndex] || "Free";
-            const price = cleanPrice(cols[priceIndex]);
-
-            let hash = 0;
-            for (let k = 0; k < appName.length; k++) {
-              hash = appName.charCodeAt(k) + ((hash << 5) - hash);
-            }
-            const absHash = Math.abs(hash);
-            const lastUpdatedDays = 5 + (absHash % 150);
-            const ads = (absHash % 3 === 0) ? "No" : "Yes";
-
-            allApps.push({
-              appName,
-              category,
-              rating,
-              reviews,
-              installs,
-              size,
-              appType: type,
-              price,
-              lastUpdatedDays,
-              ads
-            });
-          }
-        }
-      }
-
-      // 2. Load from JSON to complete full dataset
-      if (fs.existsSync(datasetPath)) {
-        const rawData = fs.readFileSync(datasetPath, "utf-8");
-        const dataset = JSON.parse(rawData);
-
-        Object.entries(dataset).forEach(([catName, apps]: [string, any]) => {
-          apps.forEach((app: any) => {
-            const appName = app.appName || "Unknown App";
-            const appNameLower = appName.toLowerCase().trim();
-            if (seenApps.has(appNameLower)) return;
-            seenApps.add(appNameLower);
-
-            let hash = 0;
-            for (let i = 0; i < appName.length; i++) {
-              hash = appName.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            const absHash = Math.abs(hash);
-            const lastUpdatedDays = 5 + (absHash % 150);
-            const ads = (absHash % 3 === 0) ? "No" : "Yes";
-
-            allApps.push({
-              appName,
-              category: catName,
-              rating: typeof app.rating === "number" ? app.rating : 4.0,
-              reviews: typeof app.reviews === "number" ? app.reviews : 250,
-              installs: typeof app.installs === "number" ? app.installs : 10000,
-              size: typeof app.size === "number" ? app.size : 15,
-              appType: app.appType || "Free",
-              price: typeof app.price === "number" ? app.price : 0,
-              lastUpdatedDays,
-              ads
-            });
-          });
-        });
-      }
-
+      const allApps = loadGooglePlayCSV();
       const totalApps = allApps.length;
+      console.log(`DEBUG: /api/eda-dashboard-data endpoint accessed. Loaded and using ${totalApps} unique apps from googleplay.csv.`);
+
       if (totalApps === 0) {
         return res.status(404).json({ error: "No data available in dataset" });
       }

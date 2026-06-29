@@ -1133,6 +1133,119 @@ document.addEventListener("DOMContentLoaded", () => {
         fiEl.innerHTML = updateInsight.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
       }
 
+      // 5. Populate the 5 Performance Signals Cards dynamically
+      const cardRatingDesc = document.getElementById("trend-rating-signal-desc");
+      const cardRatingBadge = document.getElementById("trend-rating-signal-badge");
+      const cardGrowthDesc = document.getElementById("trend-growth-desc");
+      const cardGrowthBadge = document.getElementById("trend-growth-badge");
+      const cardFeatureDesc = document.getElementById("trend-feature-desc");
+      const cardFeatureBadge = document.getElementById("trend-feature-badge");
+      const cardImprovementDesc = document.getElementById("trend-improvement-desc");
+      const cardImprovementBadge = document.getElementById("trend-improvement-badge");
+      const cardUpdateDesc = document.getElementById("trend-update-desc");
+      const cardUpdateBadge = document.getElementById("trend-update-badge");
+
+      // Card 1: Rating Signal
+      if (cardRatingDesc) {
+        cardRatingDesc.textContent = `Predicted rating is ${predRating.toFixed(1)}★ based on current specifications.`;
+      }
+      if (cardRatingBadge) {
+        cardRatingBadge.textContent = `${predRating.toFixed(1)}★ predicted`;
+      }
+
+      // Card 2: Growth Potential (using installs input feature)
+      if (cardGrowthDesc) {
+        const installFormatted = lastPredictionData.installs >= 1000000 
+          ? `${(lastPredictionData.installs / 1000000).toFixed(1)}M` 
+          : lastPredictionData.installs >= 1000 
+            ? `${(lastPredictionData.installs / 1000).toFixed(0)}K` 
+            : `${lastPredictionData.installs}`;
+        cardGrowthDesc.textContent = `${installFormatted} download volume supports strong user acquisition and visibility.`;
+      }
+      if (cardGrowthBadge) {
+        cardGrowthBadge.textContent = `${lastPredictionData.installs.toLocaleString()} downloads`;
+      }
+
+      // Card 3: Feature Strength (using positive SHAP values)
+      const shapValues = lastPredictionData.shap_values || {};
+      const shapEntries = Object.entries(shapValues);
+      const positiveShaps = shapEntries.filter(([_, val]) => val > 0).sort((a, b) => b[1] - a[1]);
+      
+      let topPositiveFeature = "Core Setup";
+      let topPositiveVal = 0.0;
+      if (positiveShaps.length > 0) {
+        topPositiveFeature = positiveShaps[0][0];
+        topPositiveVal = positiveShaps[0][1];
+      }
+
+      if (cardFeatureDesc) {
+        let featureMsg = "Excellent application configurations boost overall store discovery.";
+        if (topPositiveFeature === "Category Fit" || topPositiveFeature === "Market Category") {
+          featureMsg = "Perfect category alignment provides a strategic rating advantage.";
+        } else if (topPositiveFeature === "Engagement Ratio" || topPositiveFeature === "Installs Volume") {
+          featureMsg = "High active engagement ratio supports stable rating performance.";
+        } else if (topPositiveFeature === "Update Recency") {
+          featureMsg = "Recent update schedule drives superior user trust metrics.";
+        } else if (topPositiveFeature === "Package Size") {
+          featureMsg = "Optimized small app footprint facilitates fast onboarding.";
+        } else if (topPositiveFeature === "Ad Presence") {
+          featureMsg = "A clean ad-free experience boosts immediate user satisfaction.";
+        }
+        cardFeatureDesc.textContent = featureMsg;
+      }
+      if (cardFeatureBadge) {
+        cardFeatureBadge.textContent = topPositiveVal > 0 
+          ? `+${topPositiveVal.toFixed(2)} impact` 
+          : "Fully optimized";
+      }
+
+      // Card 4: Improvement Area (using negative SHAP values)
+      const negativeShaps = shapEntries.filter(([_, val]) => val < 0).sort((a, b) => a[1] - b[1]);
+      let worstFeature = "None";
+      let worstVal = 0.0;
+      if (negativeShaps.length > 0) {
+        worstFeature = negativeShaps[0][0];
+        worstVal = negativeShaps[0][1];
+      }
+
+      if (cardImprovementDesc) {
+        let impMsg = "Ensure your app attributes match current user needs.";
+        if (worstFeature === "Ad Presence") {
+          impMsg = "Ad frequency slightly limits overall rating growth potential.";
+        } else if (worstFeature === "Engagement Ratio") {
+          impMsg = "Promoting review collection helps build stronger store ratings.";
+        } else if (worstFeature === "Update Recency") {
+          impMsg = "Frequent updates will address minor quality issues quickly.";
+        } else if (worstFeature === "Package Size") {
+          impMsg = "Compressing heavy resources might improve user download rates.";
+        } else if (worstFeature === "Category Fit") {
+          impMsg = "Stiff category competition raises baseline quality expectations.";
+        }
+        cardImprovementDesc.textContent = impMsg;
+      }
+      if (cardImprovementBadge) {
+        cardImprovementBadge.textContent = worstVal < 0 
+          ? `${worstVal.toFixed(2)} impact` 
+          : "Highly efficient";
+      }
+
+      // Card 5: Update Signal (using updates input feature)
+      const daysSinceUpdate = lastPredictionData.updates ?? 30;
+      if (cardUpdateDesc) {
+        let updateMsg = `Frequent updates keep your app completely modern.`;
+        if (daysSinceUpdate <= 30) {
+          updateMsg = `A highly active update cycle drives consistent store momentum.`;
+        } else if (daysSinceUpdate <= 90) {
+          updateMsg = `Recent update schedule ensures continuous product reliability.`;
+        } else {
+          updateMsg = `Refreshing your software package boosts rating growth.`;
+        }
+        cardUpdateDesc.textContent = updateMsg;
+      }
+      if (cardUpdateBadge) {
+        cardUpdateBadge.textContent = `${daysSinceUpdate}d update age`;
+      }
+
       if (trendLoading) trendLoading.classList.add("hidden");
       if (trendContent) trendContent.classList.remove("hidden");
 
@@ -3500,7 +3613,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // Fetch dynamic total app stats and category counts from backend dataset.json file
+      // Fetch dynamic total app stats and category counts from backend CSV dataset
       const datasetRes = await fetch("/api/eda-insights");
       if (datasetRes.ok) {
         const datasetData = await datasetRes.json();

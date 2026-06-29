@@ -674,74 +674,99 @@
               </div>
             </div>
 
-            <!-- Bento Grid of Qualitative Insights -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- 1. Market Position Explanation -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
-                <div class="flex items-center space-x-2">
-                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <!-- Bento Grid of 5 Performance Signals Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+              
+              <!-- Card 1: Rating Signal -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                <div class="space-y-4">
+                  <div class="p-2.5 bg-amber-50 dark:bg-amber-950/20 text-amber-500 dark:text-amber-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.24.588 1.81l-3.974 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.974-2.888a1 1 0 00-1.176 0l-3.974 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.974-2.888c-.777-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                  </div>
+                  <div class="space-y-1.5">
+                    <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight font-sans">Rating Signal</h4>
+                    <p id="trend-rating-signal-desc" class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Predicted rating meets your current specifications.</p>
+                  </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                  <span id="trend-rating-signal-badge" class="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-lg">4.3★ predicted</span>
+                </div>
+              </div>
+
+              <!-- Card 2: Growth Potential -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                <div class="space-y-4">
+                  <div class="p-2.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 dark:text-indigo-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
-                  </span>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Competitive Standing</h3>
+                  </div>
+                  <div class="space-y-1.5">
+                    <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight font-sans">Growth Potential</h4>
+                    <p id="trend-growth-desc" class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Projected user base supports stable organic scaling.</p>
+                  </div>
                 </div>
-                <p id="trend-position-desc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                  <span id="trend-growth-badge" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 px-2 py-0.5 rounded-lg">High momentum</span>
+                </div>
               </div>
 
-              <!-- 2. Quality expectation evolution (Rating trend) -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
-                <div class="flex items-center space-x-2">
-                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <!-- Card 3: Feature Strength -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                <div class="space-y-4">
+                  <div class="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 dark:text-emerald-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                  </span>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Quality Trend Evolution</h3>
+                  </div>
+                  <div class="space-y-1.5">
+                    <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight font-sans">Feature Strength</h4>
+                    <p id="trend-feature-desc" class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Great category selection boosts your market appeal.</p>
+                  </div>
                 </div>
-                <p id="trend-rating-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                  <span id="trend-feature-badge" class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-lg">Top driver</span>
+                </div>
               </div>
 
-              <!-- 3. Market expansion trend (Install trend) -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
-                <div class="flex items-center space-x-2">
-                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              <!-- Card 4: Improvement Area -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                <div class="space-y-4">
+                  <div class="p-2.5 bg-rose-50 dark:bg-rose-950/20 text-rose-500 dark:text-rose-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
-                  </span>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Market Expansion Scaling</h3>
+                  </div>
+                  <div class="space-y-1.5">
+                    <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight font-sans">Improvement Area</h4>
+                    <p id="trend-improvement-desc" class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">In-app ads can slightly impact user feedback.</p>
+                  </div>
                 </div>
-                <p id="trend-install-growth-desc" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                  The overall category shows consistent and expanding install volumes over time, demonstrating broad market growth and continuing consumer interest.
-                </p>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                  <span id="trend-improvement-badge" class="text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 px-2 py-0.5 rounded-lg">Minor adjustment</span>
+                </div>
               </div>
 
-              <!-- 4. Scaling insight (higher rated grow better) -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3">
-                <div class="flex items-center space-x-2">
-                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </span>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Sustained Growth Amplification</h3>
-                </div>
-                <p id="trend-install-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
-              </div>
-
-              <!-- 5. Update frequency impact -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-3 md:col-span-2">
-                <div class="flex items-center space-x-2">
-                  <span class="p-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-lg">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <!-- Card 5: Update Signal -->
+              <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                <div class="space-y-4">
+                  <div class="p-2.5 bg-sky-50 dark:bg-sky-950/20 text-sky-500 dark:text-sky-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.2 8H18.5" />
                     </svg>
-                  </span>
-                  <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">Agile QA and Maintenance Advantage</h3>
+                  </div>
+                  <div class="space-y-1.5">
+                    <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight font-sans">Update Signal</h4>
+                    <p id="trend-update-desc" class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Recent update cycle keeps features running smoothly.</p>
+                  </div>
                 </div>
-                <p id="trend-frequency-insight" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium"></p>
+                <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                  <span id="trend-update-badge" class="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/20 px-2 py-0.5 rounded-lg">Active updates</span>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -863,47 +888,118 @@
 
         <div id="page-eda-insights" class="page-container p-4 md:p-8 space-y-6 hidden">
           <div class="max-w-5xl mx-auto space-y-6">
-            <!-- Page Hero Header (SaaS Standard) -->
-            <div class="border-b border-slate-200/60 dark:border-slate-800/60 pb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block font-sans">Empirical Discovery</span>
-                <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Market EDA Insights</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-normal">Strategic analysis of reference patterns to identify critical levers driving average store rating performance.</p>
-              </div>
-              <button id="eda-refresh-btn" class="px-3.5 py-1.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40 text-xs font-semibold rounded-xl hover:bg-indigo-100/50 dark:hover:bg-indigo-950/60 transition-all cursor-pointer flex items-center space-x-1.5 shrink-0">
-                <svg class="h-3 w-3 animate-spin-hover" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 15.89M21 20v-5h-.581" />
-                </svg>
-                <span>Recalculate Analysis</span>
-              </button>
+            <!-- Page Hero Header -->
+            <div class="border-b border-slate-200/60 dark:border-slate-800/60 pb-4">
+              <span class="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest block font-sans">Empirical Discovery</span>
+              <h2 class="text-[20px] md:text-[22px] font-semibold text-slate-900 dark:text-white tracking-tight">How App Ratings Really Work</h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-normal">Simple insights from real app data</p>
             </div>
 
             <!-- Loading State -->
-            <div id="eda-loading-state" class="space-y-6 py-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs animate-pulse">
-              <div class="h-4 w-1/3 bg-slate-200 dark:bg-slate-800 rounded mb-4"></div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-                <div class="h-24 bg-slate-100 dark:bg-slate-800 rounded-xl"></div>
-              </div>
-              <p class="text-[10px] text-center text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Computing statistical models dynamically...</p>
+            <div id="eda-loading-state" class="py-12 flex flex-col items-center justify-center space-y-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs">
+              <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <p class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Loading store research insights...</p>
             </div>
 
-            <!-- Content Container (hidden by default) -->
-            <div id="eda-content" class="hidden space-y-8">
+            <!-- Content Container (hidden by default, shown when updateEdaInsightsView completes) -->
+            <div id="eda-content" class="hidden">
+              
+              <!-- 5-Card Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+                
+                <!-- Card 1: Rating Pattern -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                  <div class="space-y-4">
+                    <div class="p-2.5 bg-amber-50 dark:bg-amber-950/20 text-amber-500 dark:text-amber-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.907c.961 0 1.36 1.24.588 1.81l-3.974 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.974-2.888a1 1 0 00-1.176 0l-3.974 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.974-2.888c-.777-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                      </svg>
+                    </div>
+                    <div class="space-y-1.5">
+                      <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight">High Rating Norm</h4>
+                      <p class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Most apps in the store hold high ratings of 4.0 or above.</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                    <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-lg">82% above 4.0★</span>
+                  </div>
+                </div>
 
-              <!-- KEY TAKEAWAYS ONLY -->
-              <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6">
-                <div class="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-                  <svg class="h-5 w-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364.364l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                  <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 font-sans">Core Strategic Takeaways</h3>
+                <!-- Card 2: Category Difference -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                  <div class="space-y-4">
+                    <div class="p-2.5 bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 dark:text-indigo-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                      </svg>
+                    </div>
+                    <div class="space-y-1.5">
+                      <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight">Category Variations</h4>
+                      <p class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Average ratings vary significantly depending on the specific app category.</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                    <span class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/20 px-2 py-0.5 rounded-lg">0.6★ rating spread</span>
+                  </div>
                 </div>
-                <div id="eda-takeaways" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
-                  <!-- Filled dynamically -->
+
+                <!-- Card 3: Hidden Pattern -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                  <div class="space-y-4">
+                    <div class="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-500 dark:text-emerald-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                    </div>
+                    <div class="space-y-1.5">
+                      <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight">Niche App Advantage</h4>
+                      <p class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Niche apps with fewer downloads often maintain surprisingly higher ratings.</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                    <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-lg">Higher niche ratings</span>
+                  </div>
                 </div>
+
+                <!-- Card 4: User Behavior -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                  <div class="space-y-4">
+                    <div class="p-2.5 bg-rose-50 dark:bg-rose-950/20 text-rose-500 dark:text-rose-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    <div class="space-y-1.5">
+                      <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight">Negative Bias Hook</h4>
+                      <p class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Disappointed users are far more motivated to leave a review.</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                    <span class="text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 px-2 py-0.5 rounded-lg">3x review rate</span>
+                  </div>
+                </div>
+
+                <!-- Card 5: Reality Check -->
+                <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800/85 rounded-2xl p-5 shadow-xs hover:shadow-sm transition-all flex flex-col justify-between h-full group">
+                  <div class="space-y-4">
+                    <div class="p-2.5 bg-sky-50 dark:bg-sky-950/20 text-sky-500 dark:text-sky-400 rounded-xl w-fit group-hover:scale-105 transition-transform">
+                      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div class="space-y-1.5">
+                      <h4 class="text-[14px] md:text-[16px] font-medium text-slate-800 dark:text-slate-100 tracking-tight">Trust Over Volume</h4>
+                      <p class="text-[12px] md:text-[13px] font-normal text-slate-500 dark:text-slate-400 leading-normal">Extremely popular apps secure stable ratings backed by user trust.</p>
+                    </div>
+                  </div>
+                  <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60">
+                    <span class="text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/20 px-2 py-0.5 rounded-lg">4.3★ popular average</span>
+                  </div>
+                </div>
+
               </div>
 
             </div>
